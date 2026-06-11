@@ -3,79 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RPGマダミス 開発テスト画面</title>
+    <title>RPGマダミス リアルタイムテスト</title>
     <style>
-        /* 見た目を整えるためのデザイン（CSS） */
         body { font-family: sans-serif; background: #1a1a1a; color: #fff; text-align: center; padding: 50px; }
         .card { background: #2a2a2a; border: 2px solid #444; border-radius: 10px; padding: 20px; max-width: 400px; margin: 0 auto 20px; }
         .hp-bar { font-size: 24px; color: #ff4757; font-weight: bold; }
         button { background: #2ed573; color: white; border: none; padding: 12px 24px; font-size: 18px; border-radius: 5px; cursor: pointer; font-weight: bold; }
         button:hover { background: #26af5f; }
         #log { margin-top: 20px; color: #eccc68; font-style: italic; }
+        .status { color: #70a1ff; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-    <h1>⚔️ バトル計算テスト画面 ⚔️</h1>
+    <h1>⚔️ 同期バトルテスト画面 ⚔️</h1>
+    <div class="status">※2つのブラウザで開くとリアルタイムに連動します</div>
 
-    <!-- 敵の情報を表示するエリア -->
     <div class="card">
         <h2>雷王龍 ジーク</h2>
         <p>弱点属性：氷</p>
-        <div class="hp-bar">HP: <span id="enemy-hp">500</span> / 500</div>
+        <div class="hp-bar">HP: <span id="enemy-hp">---</span> / 500</div>
     </div>
 
-    <!-- プレイヤーの攻撃ボタン -->
     <p>あなたの装備: <strong>氷のクナイ</strong></p>
     <button onclick="attackEnemy()">氷のクナイでアタック！</button>
 
-    <!-- 計算結果を表示するログ -->
-    <div id="log"></div>
+    <div id="log">ゲームに接続中...</div>
 
-    <script>
-        // ボタンを押したときの計算の仕組み（JavaScript）
-        
-        // 1. 現在の敵のデータを記憶する変数
-        let enemyHp = 500;
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // ーーー 👇ここにあなたのFirebase設定を貼り付けてください👇 ーーー
+        const firebaseConfig = {
+  apiKey: "AIzaSyAukrEescGPA2dPIZc4IJtXJYYie2uuW1A",
+  authDomain: "rpg-murder.firebaseapp.com",
+  databaseURL: "https://rpg-murder-default-rtdb.firebaseio.com",
+  projectId: "rpg-murder",
+  storageBucket: "rpg-murder.firebasestorage.app",
+  messagingSenderId: "397842198430",
+  appId: "1:397842198430:web:3c8c2137dcc1e8650a708f",
+};
+            // ★Firebaseの画面に表示された「apiKey」から「appId」までをここに上書きします
+        };
+        // ーーー 👆ここまで ーーー
+
+        // Firebaseの起動
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const enemyRef = ref(db, 'battle/enemy');
+
+        // ゲームの初期設定（データベースに敵がいない場合、新しく作成する）
+        let currentHp = 500;
         const enemyWeakness = "氷";
+        const baseDamage = 50;
 
-        // 2. プレイヤーの攻撃データ
-        const playerWeapon = "氷のクナイ";
-        const playerElement = "氷"; // 武器の属性
-        const baseDamage = 50;      // 基本の攻撃力
+        // 🔄 データベースの値を24時間監視する魔法の処理
+        onValue(enemyRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                currentHp = data.hp;
+                document.getElementById("enemy-hp").innerText = currentHp;
+                
+                if (currentHp <= 0) {
+                    document.getElementById("log").innerText = "🎉 雷王龍 ジークを討伐した！";
+                } else if (currentHp === 500) {
+                    document.getElementById("log").innerText = "バトル開始！敵のHPは満タンです。";
+                } else {
+                    document.getElementById("log").innerText = `誰かが攻撃した！ジークの残りHP: ${currentHp}`;
+                }
+            } else {
+                // データベースが空っぽなら初期化する
+                set(enemyRef, { hp: 500, weakness: "氷" });
+            }
+        });
 
-        // 3. ボタンが押されたときに実行される関数（処理のまとまり）
-        function attackEnemy() {
-            // もし既に敵が倒れていたら何もしない
-            if (enemyHp <= 0) {
-                document.getElementById("log").innerText = "敵はすでに倒れています！";
+        // ⚔️ ボタンを押したときの処理（データをネットに送信する）
+        window.attackEnemy = function() {
+            if (currentHp <= 0) {
+                alert("敵はすでに倒れています！");
                 return;
             }
 
-            let finalDamage = baseDamage;
-            let logMessage = "";
-
-            // ★ここで「特攻（弱点）」の自動計算を行っています！
-            if (playerElement === enemyWeakness) {
-                finalDamage = baseDamage * 2; // 弱点属性ならダメージ2倍！
-                logMessage = "【効果は抜群だ！】 ";
+            // ダメージ計算（弱点なら2倍）
+            let damage = baseDamage;
+            if (enemyWeakness === "氷") {
+                damage = baseDamage * 2;
             }
 
-            // 敵のHPを減らす
-            enemyHp = enemyHp - finalDamage;
-            
-            // HPが0以下になったら0で止める
-            if (enemyHp < 0) { enemyHp = 0; }
+            let newHp = currentHp - damage;
+            if (newHp < 0) newHp = 0;
 
-            // 4. 計算した結果を、画面の文字に書き換える
-            document.getElementById("enemy-hp").innerText = enemyHp;
-            
-            logMessage += `忍の攻撃！ジークに ${finalDamage} のダメージを与えた！`;
-            if (enemyHp === 0) {
-                logMessage += " 🎉雷王龍 ジークを討伐した！";
-            }
-            document.getElementById("log").innerText = logMessage;
-        }
+            // 📢 計算した新しいHPをインターネット上のデータベースに上書き保存する！
+            set(enemyRef, { hp: newHp, weakness: "氷" });
+        };
     </script>
 </body>
 </html>
