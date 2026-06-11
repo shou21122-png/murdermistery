@@ -27,6 +27,36 @@
                 <h1 class="text-xl font-bold text-indigo-400 flex items-center gap-2">
                     ⚔️ RPG × マーダーミステリー <span class="text-xs bg-indigo-900 text-indigo-300 px-2 py-0.5 rounded border border-indigo-700">開発Ver6.0</span>
                 </h1>
+                <div>
+                <h1 class="text-xl font-bold text-indigo-400 flex items-center gap-2">
+                    ⚔️ RPG × マーダーミステリー <span class="text-xs bg-indigo-900 text-indigo-300 px-2 py-0.5 rounded border border-indigo-700">開発Ver6.0</span>
+                </h1>
+                <p class="text-xs text-gray-400 mt-0.5">全5面・4フェーズ完全自動周回 ＆ 6面魔王城マダミス開示システム</p>
+            </div>
+            
+            <button onclick="toggleModal(true)" class="bg-indigo-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-500 transition ml-4">
+                ⚙️ メニュー
+            </button>
+            ```
+
+---
+
+### 2. ファイルの末尾にモーダルHTMLを追加する（約664行目付近）
+ファイルの最後、`</script>` タグの**直前**（または `</body>` の直前）に、モーダルの構造を追加します。
+
+```html
+<div id="personal-modal" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-gray-800 p-6 rounded-xl w-full max-w-lg border border-indigo-500 shadow-2xl h-[80vh] flex flex-col">
+            <h2 class="text-lg font-bold text-indigo-300 mb-4">ステータス・装備設定</h2>
+            <div class="flex gap-2 mb-4">
+                <button onclick="showTab('equip')" class="bg-gray-700 px-3 py-1 rounded text-xs">装備</button>
+                <button onclick="showTab('items')" class="bg-gray-700 px-3 py-1 rounded text-xs">所持品</button>
+                <button onclick="showTab('memo')" class="bg-gray-700 px-3 py-1 rounded text-xs">メモ</button>
+            </div>
+            <div id="modal-content" class="flex-grow overflow-y-auto custom-scroll text-sm space-y-4"></div>
+            <button onclick="toggleModal(false)" class="mt-4 w-full bg-gray-700 py-2 rounded-lg hover:bg-gray-600 font-bold">閉じる</button>
+        </div>
+    </div>
                 <p class="text-xs text-gray-400 mt-0.5">全5面・4フェーズ完全自動周回 ＆ 6面魔王城マダミス開示システム</p>
             </div>
             <!-- 現在の面 ＆ フェースステータス -->
@@ -963,7 +993,22 @@
                 container.innerHTML = `<p class="text-gray-500 italic text-center py-2">メモはまだありません。容疑や推理を記録しましょう。</p>`;
                 return;
             }
+// 666行目付近、scriptの末尾に追記
+        window.toggleModal = (show) => {
+            document.getElementById("personal-modal").classList.toggle("hidden", !show);
+            if(show) showTab('equip');
+        };
 
+        window.showTab = (tab) => {
+            const content = document.getElementById("modal-content");
+            if (tab === 'equip') {
+                content.innerHTML = `<h3 class="font-bold text-gray-400">装備リスト</h3><p class="text-gray-500">現在装備可能なアイテムはありません。</p>`;
+            } else if (tab === 'items') {
+                content.innerHTML = `<h3 class="font-bold text-gray-400">所持品一覧</h3><p class="text-gray-500">所持品はありません。</p>`;
+            } else {
+                content.innerHTML = `<h3 class="font-bold text-gray-400">個人メモ</h3><textarea class="w-full bg-gray-900 p-2 rounded h-32 border border-gray-700" placeholder="ここに個人的なメモを入力..."></textarea>`;
+            }
+        };
             memos.forEach(memo => {
                 const item = document.createElement("div");
                 item.className = "bg-gray-900 border border-gray-750 p-2 rounded flex justify-between items-start gap-3 hover:border-gray-600 transition";
