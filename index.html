@@ -59,7 +59,6 @@
             transition: all 0.3s;
         }
 
-        /* 自分が選んだキャラを目立たせる装飾 */
         .player-card.my-character {
             border: 2px solid #2ed573;
             box-shadow: 0 0 10px rgba(46, 213, 115, 0.4);
@@ -87,20 +86,21 @@
             color: #fff;
         }
 
-        .hp-bar {
+        /* HP・SPバー */
+        .bar-container {
+            font-size: 11px;
+            color: #aaa;
+            margin-bottom: 4px;
+        }
+        .hp-bar, .sp-bar {
             background: #444;
             border-radius: 4px;
-            height: 12px;
+            height: 10px;
             overflow: hidden;
-            margin-bottom: 6px;
+            margin-top: 2px;
         }
-
-        .hp-fill {
-            background: #ff4757;
-            height: 100%;
-            width: 100%;
-            transition: width 0.3s;
-        }
+        .hp-fill { background: #ff4757; height: 100%; width: 100%; transition: width 0.3s; }
+        .sp-fill { background: #ffa500; height: 100%; width: 0%; transition: width 0.3s; } /* 初期SPは0% */
 
         .equip-grid {
             display: grid;
@@ -108,6 +108,7 @@
             gap: 4px;
             font-size: 11px;
             color: #aaa;
+            margin-top: 6px;
         }
 
         .equip-item {
@@ -126,10 +127,7 @@
             overflow-y: auto;
         }
 
-        /* キャラクター選択画面のスタイル */
-        .select-container {
-            text-align: center;
-        }
+        .select-container { text-align: center; }
         .select-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -147,70 +145,45 @@
             font-weight: bold;
             transition: all 0.2s;
         }
-        .select-btn:hover {
-            background: #3a3a3a;
-            border-color: #2ed573;
-        }
+        .select-btn:hover { background: #3a3a3a; border-color: #2ed573; }
 
-        /* バトル操作用のスタイル */
-        .battle-controls {
-            text-align: center;
-            display: none; /* 最初は非表示 */
+        /* バトル操作エリア */
+        .battle-controls { text-align: center; display: none; }
+        
+        /* ⚔️ コマンドボタンの配置（横並び3択） */
+        .command-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
         }
-
-        /* 右側：敵の情報 */
-        .enemy-pane {
-            width: 260px;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .enemy-icon {
-            width: 120px;
-            height: 120px;
-            background: #2a2a2a;
-            border: 2px solid #ff4757;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 60px;
-            margin-top: 20px;
-        }
-
-        .enemy-name {
-            font-size: 20px;
-            font-weight: bold;
-            color: #ff4757;
-            margin: 0;
-        }
-
-        .enemy-hp-container {
-            width: 100%;
-            text-align: center;
-        }
-
-        .enemy-hp-text {
-            font-size: 24px;
-            font-weight: bold;
-            color: #ff4757;
-            margin-bottom: 5px;
-        }
-
-        .action-btn {
-            background: #2ed573;
+        .cmd-btn {
             color: white;
             border: none;
-            padding: 12px 24px;
-            font-size: 18px;
+            padding: 15px 10px;
+            font-size: 14px;
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
-            width: 100%;
-            margin-top: 15px;
+            transition: opacity 0.2s;
         }
-        .action-btn:hover { background: #26af5f; }
-        #log { color: #eccc68; margin-top: 15px; font-style: italic; }
+        .cmd-btn:hover { opacity: 0.8; }
+        .btn-normal { background: #57606f; } /* 通常 */
+        .btn-skill { background: #3498db; }  /* スキル */
+        .btn-ultimate { background: #e74c3c; } /* 必殺 */
+        .btn-ultimate:disabled { background: #444; color: #888; cursor: not-allowed; }
+
+        /* 右側：敵の情報 */
+        .enemy-pane { width: 260px; align-items: center; gap: 20px; }
+        .enemy-icon {
+            width: 120px; height: 120px; background: #2a2a2a;
+            border: 2px solid #ff4757; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 60px; margin-top: 20px;
+        }
+        .enemy-name { font-size: 20px; font-weight: bold; color: #ff4757; margin: 0; }
+        .enemy-hp-container { width: 100%; text-align: center; }
+        .enemy-hp-text { font-size: 24px; font-weight: bold; color: #ff4757; margin-bottom: 5px; }
+        #log { color: #eccc68; margin-top: 15px; font-style: italic; background: #222; padding: 10px; border-radius: 6px; min-height: 40px; }
     </style>
 </head>
 <body>
@@ -219,65 +192,71 @@
 
     <div class="game-container">
 
+        <!-- 👥 左端：4人のプレイヤー欄 -->
         <div class="pane player-pane">
+            <!-- 忍 -->
             <div class="player-card" id="card-shinobi">
                 <div class="char-icon">🥷</div>
                 <div class="player-info">
                     <div class="player-name">忍</div>
-                    <div class="hp-bar"><div id="hp-shinobi" class="hp-fill"></div></div>
+                    <div class="bar-container">HP<div class="hp-bar"><div id="hp-shinobi" class="hp-fill"></div></div></div>
+                    <div class="bar-container">SP (必殺ゲージ)<div class="sp-bar"><div id="sp-bar-shinobi" class="sp-fill"></div></div></div>
                     <div class="equip-grid">
                         <div class="equip-item">頭: 忍頭巾</div><div class="equip-item">胴: 忍装束</div>
                         <div class="equip-item">足: 地下足袋</div><div class="equip-item">武: 氷のクナイ</div>
-                        <div class="equip-item" style="grid-column: span 2;">飾: なし</div>
                     </div>
                 </div>
             </div>
 
+            <!-- 悪魔 -->
             <div class="player-card" id="card-demon">
                 <div class="char-icon">😈</div>
                 <div class="player-info">
                     <div class="player-name">悪魔</div>
-                    <div class="hp-bar"><div id="hp-demon" class="hp-fill"></div></div>
+                    <div class="bar-container">HP<div class="hp-bar"><div id="hp-demon" class="hp-fill"></div></div></div>
+                    <div class="bar-container">SP (必殺ゲージ)<div class="sp-bar"><div id="sp-bar-demon" class="sp-fill"></div></div></div>
                     <div class="equip-grid">
                         <div class="equip-item">頭: なし</div><div class="equip-item">胴: 漆黒の鎧</div>
                         <div class="equip-item">足: 鉄のブーツ</div><div class="equip-item">武: 呪いの大剣</div>
-                        <div class="equip-item" style="grid-column: span 2;">飾: 地獄の指輪</div>
                     </div>
                 </div>
             </div>
 
+            <!-- 神官(兄) -->
             <div class="player-card" id="card-priest_b">
                 <div class="char-icon">👦</div>
                 <div class="player-info">
                     <div class="player-name">神官（兄）</div>
-                    <div class="hp-bar"><div id="hp-priest_b" class="hp-fill"></div></div>
+                    <div class="bar-container">HP<div class="hp-bar"><div id="hp-priest_b" class="hp-fill"></div></div></div>
+                    <div class="bar-container">SP (必殺ゲージ)<div class="sp-bar"><div id="sp-bar-priest_b" class="sp-fill"></div></div></div>
                     <div class="equip-grid">
                         <div class="equip-item">頭: 布のフード</div><div class="equip-item">胴: 白の法衣</div>
                         <div class="equip-item">足: サンダル</div><div class="equip-item">武: 癒しの杖</div>
-                        <div class="equip-item" style="grid-column: span 2;">飾: なし</div>
                     </div>
                 </div>
             </div>
 
+            <!-- 神官(妹) -->
             <div class="player-card" id="card-priest_s">
                 <div class="char-icon">👧</div>
                 <div class="player-info">
                     <div class="player-name">神官（妹）</div>
-                    <div class="hp-bar"><div id="hp-priest_s" class="hp-fill"></div></div>
+                    <div class="bar-container">HP<div class="hp-bar"><div id="hp-priest_s" class="hp-fill"></div></div></div>
+                    <div class="bar-container">SP (必殺ゲージ)<div class="sp-bar"><div id="sp-bar-priest_s" class="sp-fill"></div></div></div>
                     <div class="equip-grid">
                         <div class="equip-item">頭: 布のフード</div><div class="equip-item">胴: 白の法衣</div>
                         <div class="equip-item">足: サンダル</div><div class="equip-item">武: 聖なる石</div>
-                        <div class="equip-item" style="grid-column: span 2;">飾: なし</div>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- 🗺️ 中央：キャラクター選択 ＆ 盤面 -->
         <div class="pane board-pane" id="main-board">
             
+            <!-- キャラクター選択エリア -->
             <div id="character-select" class="select-container">
                 <h2>あなたのキャラクターを選択してください</h2>
-                <p style="color: #aaa;">※他のプレイヤーと被らないように選んでください</p>
                 <div class="select-grid">
                     <button class="select-btn" onclick="chooseCharacter('shinobi')">🥷 忍 (属性:氷)</button>
                     <button class="select-btn" onclick="chooseCharacter('demon')">😈 悪魔 (属性:炎)</button>
@@ -286,15 +265,23 @@
                 </div>
             </div>
 
+            <!-- ⚔️ 3択コマンド式バトルエリア -->
             <div id="battle-controls" class="battle-controls">
                 <h2 id="your-role-title">戦闘開始！</h2>
-                <div id="skill-description" style="color: #eccc68; margin-bottom: 20px;"></div>
-                <button class="action-btn" id="attack-button" onclick="useSkill()">スキルを発動！</button>
-                <div id="log">ログがここに表示されます</div>
+                <p style="color: #aaa;">通常攻撃をすると、必殺ゲージ(SP)が【50】溜まります！</p>
+                
+                <div class="command-grid">
+                    <button class="cmd-btn btn-normal" onclick="executeAction('normal')">⚔️ 通常攻撃<br>(30ダメ / SP+50)</button>
+                    <button class="cmd-btn btn-skill" id="btn-skill-text" onclick="executeAction('skill')">🌀 スキル<br>(やや強い)</button>
+                    <button class="cmd-btn btn-ultimate" id="btn-ultimate-text" onclick="executeAction('ultimate')" disabled>🔥 必殺技<br>(SP100消費 / 超強い)</button>
+                </div>
+
+                <div id="log">バトルログがここに同期されます</div>
             </div>
             
         </div>
 
+        <!-- 👹 右端：敵の情報欄 -->
         <div class="pane enemy-pane">
             <div class="enemy-icon">🐉</div>
             <h2 class="enemy-name">雷王龍 ジーク</h2>
@@ -307,6 +294,7 @@
 
     </div>
 
+    <!-- Firebaseプログラム -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -327,86 +315,141 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const enemyRef = ref(db, 'battle/enemy');
+        const spRef = ref(db, 'battle/sp'); // 全プレイヤーのSP状態を保存する場所
 
-        let myJob = ""; // 自分が選んだ職業の識別名
+        let myJob = ""; 
         let currentEnemyHp = 500;
+        let mySp = 0; // 自分の現在のSP値（最大100）
 
-        // キャラクター固有のデータ設定
-        const characterData = {
-            shinobi: { name: "忍", skill: "氷のクナイ", damage: 100, desc: "弱点属性を突いて100ダメージを与える！" },
-            demon: { name: "悪魔", skill: "地獄の劫火", damage: 70, desc: "敵に70ダメージを与える！" },
-            priest_b: { name: "神官（兄）", skill: "セイントヒール", damage: 0, desc: "（開発中）味方を回復する！" },
-            priest_s: { name: "神官（妹）", skill: "ダークウィーク", damage: 40, desc: "敵の防御を崩して40ダメージを与える！" }
+        // 技のマスターデータ（通常・スキル・必殺）
+        const characterSkills = {
+            shinobi: {
+                name: "忍",
+                skill: { name: "氷のクナイ", dmg: 60, log: "弱点に刺さる！" },
+                ultimate: { name: "秘技・乱れ氷刃", dmg: 150, log: "無数の氷刃が引き裂く！" }
+            },
+            demon: {
+                name: "悪魔",
+                skill: { name: "地獄の劫火", dmg: 50, log: "漆黒の炎が焼き尽くす！" },
+                ultimate: { name: "滅びのバーストエンド", dmg: 130, log: "世界を滅ぼす一撃！" }
+            },
+            priest_b: {
+                name: "神官（兄）",
+                skill: { name: "セイントヒール", dmg: 20, log: "光の塊をぶつける！" }, // 回復は今後実装
+                ultimate: { name: "聖光のプロテクション", dmg: 100, log: "聖なる光が炸裂する！" }
+            },
+            priest_s: {
+                name: "神官（妹）",
+                skill: { name: "ダークウィーク", dmg: 35, log: "敵の防御力を弱体化！" },
+                ultimate: { name: "禁忌・死者蘇生", dmg: 110, log: "闇の禁術が敵を蝕む！" }
+            }
         };
 
-        // 🔘 キャラクターが選ばれたときの処理
+        // キャラ選択時の処理
         window.chooseCharacter = function(jobKey) {
             myJob = jobKey;
-            
-            // 1. 選択画面を隠して、バトル画面を出す
             document.getElementById("character-select").style.display = "none";
             document.getElementById("battle-controls").style.display = "block";
-            
-            // 2. 左側の自分のカードに緑色の枠をつける
             document.getElementById(`card-${jobKey}`).classList.add("my-character");
             
-            // 3. 中央のボタンやテキストを選んだキャラ専用にする
-            const myData = characterData[jobKey];
-            document.getElementById("your-role-title").innerText = `あなたは 【${myData.name}】 として参戦中`;
-            document.getElementById("skill-description").innerText = `専用スキル: ${myData.skill}（${myData.desc}）`;
-            document.getElementById("attack-button").innerText = `${myData.skill} を発動！`;
+            const data = characterSkills[jobKey];
+            document.getElementById("your-role-title").innerText = `あなたは 【${data.name}】 として参戦中`;
+            
+            // ボタンのテキストを固有の技名に書き換え
+            document.getElementById("btn-skill-text").innerHTML = `🌀 ${data.skill.name}<br>(やや強い: ${data.skill.dmg}ダメ)`;
+            document.getElementById("btn-ultimate-text").innerHTML = `🔥 ${data.ultimate.name}<br>(SP100消費: ${data.ultimate.dmg}ダメ)`;
         };
 
-        // ⚔️ スキルボタンを押したときの処理
-        window.useSkill = function() {
-            if (myJob === "") return;
-            if (currentEnemyHp <= 0) {
-                alert("敵はすでに倒れています！");
-                return;
+        // ⚔️ 行動ボタンを押したときの計算処理
+        window.executeAction = function(type) {
+            if (!myJob || currentEnemyHp <= 0) return;
+
+            const data = characterSkills[myJob];
+            let damage = 0;
+            let actionName = "";
+            let logText = "";
+
+            if (type === 'normal') {
+                damage = 30; // 通常攻撃は一律30
+                actionName = "通常攻撃";
+                logText = "武器で素早く斬りつけた！";
+                
+                // SPを50増やす（最大100）
+                mySp = Math.min(100, mySp + 50);
+                set(ref(db, `battle/sp/${myJob}`), mySp); // Firebaseに自分のSPを保存
+
+            } else if (type === 'skill') {
+                damage = data.skill.dmg;
+                actionName = data.skill.name;
+                logText = data.skill.log;
+
+            } else if (type === 'ultimate') {
+                if (mySp < 100) { alert("SPが足りません！"); return; }
+                damage = data.ultimate.dmg;
+                actionName = data.ultimate.name;
+                logText = data.ultimate.log;
+                
+                // SPを消費
+                mySp = 0;
+                set(ref(db, `battle/sp/${myJob}`), mySp); // Firebaseに自分のSPを保存
             }
 
-            const myData = characterData[myJob];
-            
-            // 神官兄だけ特殊（今回はログを出すだけ）
-            if (myJob === "priest_b") {
-                document.getElementById("log").innerText = "✨ 癒しの魔法を唱えた！（※味方のHP同期は次回実装します）";
-                return;
-            }
+            // 敵の残りHP計算
+            let newEnemyHp = Math.max(0, currentEnemyHp - damage);
 
-            let newEnemyHp = currentEnemyHp - myData.damage;
-            if (newEnemyHp < 0) newEnemyHp = 0;
-
-            // Firebaseに新しい敵HPを送信して上書き
-            set(enemyRef, { 
+            // Firebaseへ敵の情報を送信
+            set(enemyRef, {
                 hp: newEnemyHp,
-                lastAttacker: myData.name,
-                lastSkill: myData.skill
+                lastAttacker: data.name,
+                lastSkill: actionName,
+                lastFlavor: logText
             });
         };
 
-        // 🔄 Firebaseからのリアルタイム更新を監視
+        // 🔄 敵データの同期監視
         onValue(enemyRef, (snapshot) => {
             const data = snapshot.val();
             if (data) {
                 currentEnemyHp = data.hp;
-                
-                // 敵のHP表示を更新
                 document.getElementById("enemy-hp").innerText = currentEnemyHp;
-                let hpPercent = (currentEnemyHp / 500) * 100;
-                document.getElementById("enemy-hp-bar").style.width = hpPercent + "%";
+                document.getElementById("enemy-hp-bar").style.width = (currentEnemyHp / 500) * 100 + "%";
                 
-                // 誰が攻撃したかのログを表示
                 if (data.lastAttacker) {
-                    document.getElementById("log").innerText = `⚔️ ${data.lastAttacker} が ${data.lastSkill} を使用！ ジークにダメージ！`;
+                    document.getElementById("log").innerHTML = `<strong>【${data.lastAttacker}】の行動：</strong><br>${data.lastSkill} を発動！ (${data.lastFlavor})<br>ジークにダメージ！`;
                 }
-                
                 if (currentEnemyHp <= 0) {
                     document.getElementById("log").innerText = "🎉 雷王龍 ジークを討伐した！";
                 }
             } else {
-                // 初期化
-                set(enemyRef, { hp: 500, lastAttacker: "", lastSkill: "" });
+                set(enemyRef, { hp: 500, lastAttacker: "", lastSkill: "", lastFlavor: "" });
             }
+        });
+
+        // 🔄 全員のSP(必殺ゲージ)の同期監視
+        onValue(spRef, (snapshot) => {
+            const data = snapshot.val();
+            const jobs = ['shinobi', 'demon', 'priest_b', 'priest_s'];
+            
+            jobs.forEach(job => {
+                let spVal = (data && data[job]) ? data[job] : 0;
+                // 左側の画面のSPバーを伸ばす
+                document.getElementById(`sp-bar-${job}`).style.width = spVal + "%";
+                
+                // 自分のSPだった場合、100溜まっていれば必殺ボタンのロックを解除
+                if (job === myJob) {
+                    mySp = spVal;
+                    const ultBtn = document.getElementById("btn-ultimate-text");
+                    if (ultBtn) {
+                        if (mySp >= 100) {
+                            ultBtn.disabled = false;
+                            ultBtn.style.boxShadow = "0 0 15px #e74c3c"; // 溜まると光る演出
+                        } else {
+                            ultBtn.disabled = true;
+                            ultBtn.style.boxShadow = "none";
+                        }
+                    }
+                }
+            });
         });
     </script>
 </body>
