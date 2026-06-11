@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RPGマダミス - プレイルーム</title>
     <style>
-        /* 画面全体の基本デザイン */
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
             background: #121212;
@@ -26,7 +25,6 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
-        /* 👑 左・中・右を横並びにするメインコンテナ */
         .game-container {
             display: flex;
             flex: 1;
@@ -34,7 +32,6 @@
             height: calc(100% - 60px);
         }
 
-        /* 📋 共通のカード（枠）のデザイン */
         .pane {
             background: #1e1e1e;
             border: 2px solid #333;
@@ -45,7 +42,7 @@
             flex-direction: column;
         }
 
-        /* 👥 左側：プレイヤー一覧欄（幅300px固定） */
+        /* 左側：プレイヤー一覧 */
         .player-pane {
             width: 320px;
             gap: 15px;
@@ -59,6 +56,13 @@
             padding: 12px;
             display: flex;
             gap: 12px;
+            transition: all 0.3s;
+        }
+
+        /* 自分が選んだキャラを目立たせる装飾 */
+        .player-card.my-character {
+            border: 2px solid #2ed573;
+            box-shadow: 0 0 10px rgba(46, 213, 115, 0.4);
         }
 
         .char-icon {
@@ -94,7 +98,8 @@
         .hp-fill {
             background: #ff4757;
             height: 100%;
-            width: 100%; /* 後でJavaScriptで可変にします */
+            width: 100%;
+            transition: width 0.3s;
         }
 
         .equip-grid {
@@ -112,27 +117,51 @@
             border: 1px solid #333;
         }
 
-        /* 🗺️ 中央：大きく広がる盤面（残りの幅をすべて使う） */
+        /* 中央：盤面エリア */
         .board-pane {
             flex: 1;
-            justify-content: center;
-            align-items: center;
             background: #151515;
             border: 2px dashed #444;
-            position: relative;
+            padding: 20px;
+            overflow-y: auto;
         }
 
-        .board-placeholder {
-            color: #666;
-            font-size: 18px;
+        /* キャラクター選択画面のスタイル */
+        .select-container {
             text-align: center;
         }
+        .select-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .select-btn {
+            background: #2a2a2a;
+            border: 2px solid #444;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .select-btn:hover {
+            background: #3a3a3a;
+            border-color: #2ed573;
+        }
 
-        /* 👹 右側：敵の情報欄（幅260px固定） */
+        /* バトル操作用のスタイル */
+        .battle-controls {
+            text-align: center;
+            display: none; /* 最初は非表示 */
+        }
+
+        /* 右側：敵の情報 */
         .enemy-pane {
             width: 260px;
             align-items: center;
-            justify-content: flex-start;
             gap: 20px;
         }
 
@@ -147,7 +176,6 @@
             justify-content: center;
             font-size: 60px;
             margin-top: 20px;
-            box-shadow: 0 0 15px rgba(255, 71, 87, 0.3);
         }
 
         .enemy-name {
@@ -169,21 +197,20 @@
             margin-bottom: 5px;
         }
 
-        /* ボタンデザイン */
         .action-btn {
             background: #2ed573;
             color: white;
             border: none;
-            padding: 10px 20px;
-            font-size: 16px;
+            padding: 12px 24px;
+            font-size: 18px;
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
-            width: 80%;
-            margin-top: auto;
-            margin-bottom: 20px;
+            width: 100%;
+            margin-top: 15px;
         }
         .action-btn:hover { background: #26af5f; }
+        #log { color: #eccc68; margin-top: 15px; font-style: italic; }
     </style>
 </head>
 <body>
@@ -193,86 +220,89 @@
     <div class="game-container">
 
         <div class="pane player-pane">
-            <div class="player-card">
-                <div class="char-icon">👦</div>
+            <div class="player-card" id="card-shinobi">
+                <div class="char-icon">🥷</div>
                 <div class="player-info">
-                    <div class="player-name">神官（兄）</div>
-                    <div class="hp-bar"><div class="hp-fill"></div></div>
+                    <div class="player-name">忍</div>
+                    <div class="hp-bar"><div id="hp-shinobi" class="hp-fill"></div></div>
                     <div class="equip-grid">
-                        <div class="equip-item">頭: 布のフード</div>
-                        <div class="equip-item">胴: 白の法衣</div>
-                        <div class="equip-item">足: サンダル</div>
-                        <div class="equip-item">武: 癒しの杖</div>
+                        <div class="equip-item">頭: 忍頭巾</div><div class="equip-item">胴: 忍装束</div>
+                        <div class="equip-item">足: 地下足袋</div><div class="equip-item">武: 氷のクナイ</div>
                         <div class="equip-item" style="grid-column: span 2;">飾: なし</div>
                     </div>
                 </div>
             </div>
 
-            <div class="player-card">
-                <div class="char-icon">👧</div>
-                <div class="player-info">
-                    <div class="player-name">神官（妹）</div>
-                    <div class="hp-bar"><div class="hp-fill"></div></div>
-                    <div class="equip-grid">
-                        <div class="equip-item">頭: 布のフード</div>
-                        <div class="equip-item">胴: 白の法衣</div>
-                        <div class="equip-item">足: サンダル</div>
-                        <div class="equip-item">武: 聖なる石</div>
-                        <div class="equip-item" style="grid-column: span 2;">飾: なし</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="player-card">
+            <div class="player-card" id="card-demon">
                 <div class="char-icon">😈</div>
                 <div class="player-info">
                     <div class="player-name">悪魔</div>
-                    <div class="hp-bar"><div class="hp-fill"></div></div>
+                    <div class="hp-bar"><div id="hp-demon" class="hp-fill"></div></div>
                     <div class="equip-grid">
-                        <div class="equip-item">頭: なし</div>
-                        <div class="equip-item">胴: 漆黒の鎧</div>
-                        <div class="equip-item">足: 鉄のブーツ</div>
-                        <div class="equip-item">武: 呪いの大剣</div>
+                        <div class="equip-item">頭: なし</div><div class="equip-item">胴: 漆黒の鎧</div>
+                        <div class="equip-item">足: 鉄のブーツ</div><div class="equip-item">武: 呪いの大剣</div>
                         <div class="equip-item" style="grid-column: span 2;">飾: 地獄の指輪</div>
                     </div>
                 </div>
             </div>
 
-            <div class="player-card">
-                <div class="char-icon">🥷</div>
+            <div class="player-card" id="card-priest_b">
+                <div class="char-icon">👦</div>
                 <div class="player-info">
-                    <div class="player-name">忍</div>
-                    <div class="hp-bar"><div class="hp-fill"></div></div>
+                    <div class="player-name">神官（兄）</div>
+                    <div class="hp-bar"><div id="hp-priest_b" class="hp-fill"></div></div>
                     <div class="equip-grid">
-                        <div class="equip-item">頭: 忍頭巾</div>
-                        <div class="equip-item">胴: 忍装束</div>
-                        <div class="equip-item">足: 地下足袋</div>
-                        <div class="equip-item">武: 氷のクナイ</div>
+                        <div class="equip-item">頭: 布のフード</div><div class="equip-item">胴: 白の法衣</div>
+                        <div class="equip-item">足: サンダル</div><div class="equip-item">武: 癒しの杖</div>
+                        <div class="equip-item" style="grid-column: span 2;">飾: なし</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="player-card" id="card-priest_s">
+                <div class="char-icon">👧</div>
+                <div class="player-info">
+                    <div class="player-name">神官（妹）</div>
+                    <div class="hp-bar"><div id="hp-priest_s" class="hp-fill"></div></div>
+                    <div class="equip-grid">
+                        <div class="equip-item">頭: 布のフード</div><div class="equip-item">胴: 白の法衣</div>
+                        <div class="equip-item">足: サンダル</div><div class="equip-item">武: 聖なる石</div>
                         <div class="equip-item" style="grid-column: span 2;">飾: なし</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="pane board-pane">
-            <div class="board-placeholder">
-                <p>🗺️ メイン盤面エリア 🗺️</p>
-                <p style="font-size: 14px; color: #444;">（ここにステージのマップや、アイテムドロップの選択画面、証拠カードなどを表示します）</p>
+        <div class="pane board-pane" id="main-board">
+            
+            <div id="character-select" class="select-container">
+                <h2>あなたのキャラクターを選択してください</h2>
+                <p style="color: #aaa;">※他のプレイヤーと被らないように選んでください</p>
+                <div class="select-grid">
+                    <button class="select-btn" onclick="chooseCharacter('shinobi')">🥷 忍 (属性:氷)</button>
+                    <button class="select-btn" onclick="chooseCharacter('demon')">😈 悪魔 (属性:炎)</button>
+                    <button class="select-btn" onclick="chooseCharacter('priest_b')">👦 神官・兄 (属性:光)</button>
+                    <button class="select-btn" onclick="chooseCharacter('priest_s')">👧 神官・妹 (属性:闇)</button>
+                </div>
             </div>
+
+            <div id="battle-controls" class="battle-controls">
+                <h2 id="your-role-title">戦闘開始！</h2>
+                <div id="skill-description" style="color: #eccc68; margin-bottom: 20px;"></div>
+                <button class="action-btn" id="attack-button" onclick="useSkill()">スキルを発動！</button>
+                <div id="log">ログがここに表示されます</div>
+            </div>
+            
         </div>
 
         <div class="pane enemy-pane">
             <div class="enemy-icon">🐉</div>
             <h2 class="enemy-name">雷王龍 ジーク</h2>
-            
             <div class="enemy-hp-container">
                 <div class="enemy-hp-text">HP: <span id="enemy-hp">---</span> / 500</div>
                 <div class="hp-bar" style="width: 100%;"><div id="enemy-hp-bar" class="hp-fill" style="width: 100%;"></div></div>
             </div>
-            
-            <p style="font-size: 14px; color: #aaa; text-align: center;">弱点属性：氷<br>（忍のクナイが有効！）</p>
-            
-            <button class="action-btn" onclick="attackEnemy()">忍が攻撃する！</button>
+            <p style="font-size: 14px; color: #aaa; text-align: center;">弱点属性：氷</p>
         </div>
 
     </div>
@@ -290,6 +320,7 @@
   storageBucket: "rpg-murder.firebasestorage.app",
   messagingSenderId: "397842198430",
   appId: "1:397842198430:web:3c8c2137dcc1e8650a708f"
+
         };
         // ーーー 👆ここまで ーーー
 
@@ -297,33 +328,86 @@
         const db = getDatabase(app);
         const enemyRef = ref(db, 'battle/enemy');
 
-        let currentHp = 500;
+        let myJob = ""; // 自分が選んだ職業の識別名
+        let currentEnemyHp = 500;
 
-        // Firebaseから敵のHPを読み込んで画面に反映する
-        onValue(enemyRef, (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                currentHp = data.hp;
-                document.getElementById("enemy-hp").innerText = currentHp;
-                
-                // 敵のHPバーを計算して減らす
-                let hpPercent = (currentHp / 500) * 100;
-                document.getElementById("enemy-hp-bar").style.width = hpPercent + "%";
-            } else {
-                set(enemyRef, { hp: 500 });
-            }
-        });
+        // キャラクター固有のデータ設定
+        const characterData = {
+            shinobi: { name: "忍", skill: "氷のクナイ", damage: 100, desc: "弱点属性を突いて100ダメージを与える！" },
+            demon: { name: "悪魔", skill: "地獄の劫火", damage: 70, desc: "敵に70ダメージを与える！" },
+            priest_b: { name: "神官（兄）", skill: "セイントヒール", damage: 0, desc: "（開発中）味方を回復する！" },
+            priest_s: { name: "神官（妹）", skill: "ダークウィーク", damage: 40, desc: "敵の防御を崩して40ダメージを与える！" }
+        };
 
-        // 攻撃処理（前回のロジックを引き継ぎ）
-        window.attackEnemy = function() {
-            if (currentHp <= 0) {
+        // 🔘 キャラクターが選ばれたときの処理
+        window.chooseCharacter = function(jobKey) {
+            myJob = jobKey;
+            
+            // 1. 選択画面を隠して、バトル画面を出す
+            document.getElementById("character-select").style.display = "none";
+            document.getElementById("battle-controls").style.display = "block";
+            
+            // 2. 左側の自分のカードに緑色の枠をつける
+            document.getElementById(`card-${jobKey}`).classList.add("my-character");
+            
+            // 3. 中央のボタンやテキストを選んだキャラ専用にする
+            const myData = characterData[jobKey];
+            document.getElementById("your-role-title").innerText = `あなたは 【${myData.name}】 として参戦中`;
+            document.getElementById("skill-description").innerText = `専用スキル: ${myData.skill}（${myData.desc}）`;
+            document.getElementById("attack-button").innerText = `${myData.skill} を発動！`;
+        };
+
+        // ⚔️ スキルボタンを押したときの処理
+        window.useSkill = function() {
+            if (myJob === "") return;
+            if (currentEnemyHp <= 0) {
                 alert("敵はすでに倒れています！");
                 return;
             }
-            let newHp = currentHp - 100; // 弱点2倍で100ダメージ
-            if (newHp < 0) newHp = 0;
-            set(enemyRef, { hp: newHp });
+
+            const myData = characterData[myJob];
+            
+            // 神官兄だけ特殊（今回はログを出すだけ）
+            if (myJob === "priest_b") {
+                document.getElementById("log").innerText = "✨ 癒しの魔法を唱えた！（※味方のHP同期は次回実装します）";
+                return;
+            }
+
+            let newEnemyHp = currentEnemyHp - myData.damage;
+            if (newEnemyHp < 0) newEnemyHp = 0;
+
+            // Firebaseに新しい敵HPを送信して上書き
+            set(enemyRef, { 
+                hp: newEnemyHp,
+                lastAttacker: myData.name,
+                lastSkill: myData.skill
+            });
         };
+
+        // 🔄 Firebaseからのリアルタイム更新を監視
+        onValue(enemyRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                currentEnemyHp = data.hp;
+                
+                // 敵のHP表示を更新
+                document.getElementById("enemy-hp").innerText = currentEnemyHp;
+                let hpPercent = (currentEnemyHp / 500) * 100;
+                document.getElementById("enemy-hp-bar").style.width = hpPercent + "%";
+                
+                // 誰が攻撃したかのログを表示
+                if (data.lastAttacker) {
+                    document.getElementById("log").innerText = `⚔️ ${data.lastAttacker} が ${data.lastSkill} を使用！ ジークにダメージ！`;
+                }
+                
+                if (currentEnemyHp <= 0) {
+                    document.getElementById("log").innerText = "🎉 雷王龍 ジークを討伐した！";
+                }
+            } else {
+                // 初期化
+                set(enemyRef, { hp: 500, lastAttacker: "", lastSkill: "" });
+            }
+        });
     </script>
 </body>
 </html>
