@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPGマダミス 開発テスト画面</title>
+    <style>
+        /* 見た目を整えるためのデザイン（CSS） */
+        body { font-family: sans-serif; background: #1a1a1a; color: #fff; text-align: center; padding: 50px; }
+        .card { background: #2a2a2a; border: 2px solid #444; border-radius: 10px; padding: 20px; max-width: 400px; margin: 0 auto 20px; }
+        .hp-bar { font-size: 24px; color: #ff4757; font-weight: bold; }
+        button { background: #2ed573; color: white; border: none; padding: 12px 24px; font-size: 18px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #26af5f; }
+        #log { margin-top: 20px; color: #eccc68; font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <h1>⚔️ バトル計算テスト画面 ⚔️</h1>
+
+    <!-- 敵の情報を表示するエリア -->
+    <div class="card">
+        <h2>雷王龍 ジーク</h2>
+        <p>弱点属性：氷</p>
+        <div class="hp-bar">HP: <span id="enemy-hp">500</span> / 500</div>
+    </div>
+
+    <!-- プレイヤーの攻撃ボタン -->
+    <p>あなたの装備: <strong>氷のクナイ</strong></p>
+    <button onclick="attackEnemy()">氷のクナイでアタック！</button>
+
+    <!-- 計算結果を表示するログ -->
+    <div id="log"></div>
+
+    <script>
+        // ボタンを押したときの計算の仕組み（JavaScript）
+        
+        // 1. 現在の敵のデータを記憶する変数
+        let enemyHp = 500;
+        const enemyWeakness = "氷";
+
+        // 2. プレイヤーの攻撃データ
+        const playerWeapon = "氷のクナイ";
+        const playerElement = "氷"; // 武器の属性
+        const baseDamage = 50;      // 基本の攻撃力
+
+        // 3. ボタンが押されたときに実行される関数（処理のまとまり）
+        function attackEnemy() {
+            // もし既に敵が倒れていたら何もしない
+            if (enemyHp <= 0) {
+                document.getElementById("log").innerText = "敵はすでに倒れています！";
+                return;
+            }
+
+            let finalDamage = baseDamage;
+            let logMessage = "";
+
+            // ★ここで「特攻（弱点）」の自動計算を行っています！
+            if (playerElement === enemyWeakness) {
+                finalDamage = baseDamage * 2; // 弱点属性ならダメージ2倍！
+                logMessage = "【効果は抜群だ！】 ";
+            }
+
+            // 敵のHPを減らす
+            enemyHp = enemyHp - finalDamage;
+            
+            // HPが0以下になったら0で止める
+            if (enemyHp < 0) { enemyHp = 0; }
+
+            // 4. 計算した結果を、画面の文字に書き換える
+            document.getElementById("enemy-hp").innerText = enemyHp;
+            
+            logMessage += `忍の攻撃！ジークに ${finalDamage} のダメージを与えた！`;
+            if (enemyHp === 0) {
+                logMessage += " 🎉雷王龍 ジークを討伐した！";
+            }
+            document.getElementById("log").innerText = logMessage;
+        }
+    </script>
+</body>
+</html>
