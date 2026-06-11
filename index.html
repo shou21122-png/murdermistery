@@ -18,9 +18,9 @@
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-xl font-bold text-indigo-400 flex items-center gap-2">
-                    ⚔️ RPG × マーダーミステリー <span class="text-xs bg-indigo-900 text-indigo-300 px-2 py-0.5 rounded border border-indigo-700">開発Ver4.0</span>
+                    ⚔️ RPG × マーダーミステリー <span class="text-xs bg-indigo-900 text-indigo-300 px-2 py-0.5 rounded border border-indigo-700">開発Ver5.1</span>
                 </h1>
-                <p class="text-xs text-gray-400 mt-0.5">インベントリ装備変更 ＆ 全員準備OKで自動進行システム搭載</p>
+                <p class="text-xs text-gray-400 mt-0.5">完全個別端末ロック（のぞき見・移動防止強化版）</p>
             </div>
             <!-- 現在の面ステータス -->
             <div class="flex flex-col sm:flex-row items-center gap-3 bg-gray-900 px-4 py-2 rounded-lg border border-gray-700">
@@ -41,18 +41,23 @@
         <!-- 左側：役割選択とプレイヤー操作画面 (8コラム) -->
         <div class="lg:col-span-8 flex flex-col gap-6">
             
-            <!-- 役割（キャラクター）選択パネル -->
-            <section class="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow-sm">
-                <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">① あなたの操作キャラクターを選択</h2>
-                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3" id="role-select-container">
-                    <button onclick="selectRole('gm')" id="btn-role-gm" class="p-2.5 rounded-lg border text-xs font-bold transition bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600">👑 GM(主催者)</button>
-                    <button onclick="selectRole('ninja')" id="btn-role-ninja" class="p-2.5 rounded-lg border text-xs font-bold transition bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600">🥷 忍</button>
-                    <button onclick="selectRole('demon')" id="btn-role-demon" class="p-2.5 rounded-lg border text-xs font-bold transition bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600">😈 悪魔</button>
-                    <button onclick="selectRole('priest_bro')" id="btn-role-priest_bro" class="p-2.5 rounded-lg border text-xs font-bold transition bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600">👦 神官兄</button>
-                    <button onclick="selectRole('priest_sis')" id="btn-role-priest_sis" class="p-2.5 rounded-lg border text-xs font-bold transition bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600">👧 神官妹</button>
+            <!-- ① 役割選択パネル（未選択時のみ表示され、選んだらHTMLから完全に消える） -->
+            <section id="role-select-panel" class="bg-gradient-to-br from-gray-800 to-gray-850 p-6 rounded-xl border-2 border-dashed border-indigo-500 shadow-xl">
+                <h2 class="text-base font-black text-indigo-400 uppercase tracking-wider mb-2 text-center">🎭 あなたの担当する役職（キャラクター）を選択</h2>
+                <p class="text-xs text-center text-gray-400 mb-5">【注意】一度選ぶと、GMがリセットするまで他のキャラの画面へ移動することは一切できません！</p>
+                <div class="grid grid-cols-1 sm:grid-cols-5 gap-3" id="role-select-container">
+                    <button onclick="lockAndSelectRole('gm')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">👑 GM(主催者)</button>
+                    <button onclick="lockAndSelectRole('ninja')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">🥷 忍</button>
+                    <button onclick="lockAndSelectRole('demon')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">😈 悪魔</button>
+                    <button onclick="lockAndSelectRole('priest_bro')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">👦 神官兄</button>
+                    <button onclick="lockAndSelectRole('priest_sis')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">👧 神官妹</button>
                 </div>
-                <div id="active-role-announcement" class="mt-3 text-xs text-indigo-300 bg-indigo-950/50 px-3 py-2 rounded border border-indigo-900 hidden"></div>
             </section>
+
+            <!-- 選択済みキャラクターの永続表示バッジ -->
+            <div id="active-role-announcement" class="text-sm font-bold text-indigo-300 bg-indigo-950/80 px-4 py-3 rounded-xl border border-indigo-800 hidden flex justify-between items-center shadow-inner">
+                <!-- ここに現在のあなたの役職が表示される -->
+            </div>
 
             <!-- プレイヤー用ゲーム画面 (GM以外に表示) -->
             <section id="player-panel" class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-sm hidden flex flex-col gap-6">
@@ -97,7 +102,7 @@
 
                 <!-- 戦闘アクション (ボス生存時のみ有効) -->
                 <div id="battle-actions-section" class="border-t border-gray-700 pt-4">
-                    <h3 class="text-sm font-bold text-gray-300 mb-3 flex items-center gap-1.5">⚔️ バtlアクション</h3>
+                    <h3 class="text-sm font-bold text-gray-300 mb-3 flex items-center gap-1.5">⚔️ バトルアクション</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <button onclick="performAction('attack')" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold p-3 rounded-lg text-sm transition shadow-sm">通常攻撃を行う</button>
                         <button onclick="performAction('skill')" class="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white font-bold p-3 rounded-lg text-sm transition shadow-sm">
@@ -107,11 +112,10 @@
                     </div>
                 </div>
 
-                <!-- 🛒 ショップ (武器のバリエーションを増加) -->
+                <!-- 🛒 ショップ -->
                 <div id="shop-section" class="border-t border-gray-700 pt-4">
                     <h3 class="text-sm font-bold text-gray-300 mb-3">🛒 秘密の武器・情報屋ショップ</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <!-- 武器① -->
                         <div class="bg-gray-900 p-3 rounded-xl border border-gray-800 flex flex-col justify-between">
                             <div>
                                 <span class="text-[10px] bg-amber-950 text-amber-400 px-1.5 py-0.5 rounded font-bold">武器：バランス型</span>
@@ -122,7 +126,6 @@
                                 <span>購入</span> <span class="text-yellow-300">60 G</span>
                             </button>
                         </div>
-                        <!-- 武器② -->
                         <div class="bg-gray-900 p-3 rounded-xl border border-gray-800 flex flex-col justify-between">
                             <div>
                                 <span class="text-[10px] bg-red-950 text-red-400 px-1.5 py-0.5 rounded font-bold">武器：超火力型</span>
@@ -133,7 +136,6 @@
                                 <span>購入</span> <span class="text-yellow-300">140 G</span>
                             </button>
                         </div>
-                        <!-- 情報 -->
                         <div class="bg-gray-900 p-3 rounded-xl border border-gray-800 flex flex-col justify-between">
                             <div>
                                 <span class="text-[10px] bg-indigo-950 text-indigo-400 px-1.5 py-0.5 rounded font-bold">機密情報</span>
@@ -167,6 +169,15 @@
                 <div>
                     <h2 class="text-base font-black text-indigo-400">👑 GM(ゲームマスター)専用コントロールパネル</h2>
                     <p class="text-xs text-gray-400 mt-1">手動でステージを進行させたり、裏でのログ抹消工作を行います。</p>
+                </div>
+
+                <!-- 🚨 端末ロック解除ボタン -->
+                <div class="bg-amber-950/40 p-4 rounded-xl border border-amber-900">
+                    <h3 class="text-xs font-bold text-amber-400 mb-1">🔓 プレイヤー端末のロック強制解除</h3>
+                    <p class="text-[11px] text-gray-400 mb-3">間違えて違うキャラを選択した端末がある場合、下のボタンを押せば全員を再度キャラクター選択画面に戻せます。</p>
+                    <button onclick="triggerResetAllDevices()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold py-2 px-4 rounded transition">
+                        全員の端末ロックを解除して選び直させる
+                    </button>
                 </div>
 
                 <!-- ステージ手動変更機能 -->
@@ -241,6 +252,7 @@
         const db = getDatabase(app);
 
         const charData = {
+            gm: { name: "👑 GM(ゲームマスター)" },
             ninja: { name: "🥷 忍", secret: "【忍の秘密】東の国からの密書：『魔王の討伐後、どさくさに紛れて氷姫を暗殺せよ。』" },
             demon: { name: "😈 悪魔", secret: "【悪魔の秘密】ちぎれた魔王の肖像画：かつて魔王の右腕だった。魔王の死の真相を探っている。" },
             priest_bro: { name: "👦 神官兄", secret: "【神官兄の秘密】禁忌の魔術書の破片：『魂なき器にかりそめの命を与える呪術』。姫の遺体を動かしていた？" },
@@ -258,8 +270,9 @@
 
         let currentRole = null;
         let localGameState = {};
+        let isFirstLoad = true;
 
-        // データベース初期化・購読
+        // 🔄 データベース初期化・購読
         onValue(ref(db, 'gameState'), (snapshot) => {
             if (!snapshot.exists()) {
                 set(ref(db, 'gameState'), {
@@ -268,6 +281,7 @@
                     bossHp: 300,
                     bossMaxHp: 300,
                     rescueBuffActive: false,
+                    deviceResetCounter: 0,
                     players: {
                         ninja: { hp: 120, maxHp: 120, baseAtk: 15, atk: 15, gold: 150, sp: 0, equipped: "初期のクナイ", inventory: ["初期のクナイ"], isReady: false },
                         demon: { hp: 150, maxHp: 150, baseAtk: 20, atk: 20, gold: 100, sp: 0, equipped: "見習いの杖", inventory: ["見習いの杖"], isReady: false },
@@ -277,7 +291,16 @@
                 });
             } else {
                 localGameState = snapshot.val();
-                checkAutoStageProgression(); // 全員準備OKかどうかの自動チェック
+                
+                // 🔓 ページを読み込んだ初回、またはGMのリセットを検知した時に端末ロックを判定
+                if (isFirstLoad) {
+                    checkDeviceInitialLock();
+                    isFirstLoad = false;
+                } else {
+                    checkDeviceResetEvent();
+                }
+
+                checkAutoStageProgression();
                 updateUI();
             }
         });
@@ -325,28 +348,93 @@
             }
         });
 
-        window.selectRole = function(role) {
+        // 🎭 役職選択と強固なロック処理
+        window.lockAndSelectRole = function(role) {
+            localStorage.setItem('rpg_mdms_role', role); // ブラウザに記憶
+            if (localGameState && localGameState.deviceResetCounter !== undefined) {
+                localStorage.setItem('rpg_mdms_reset_sync', localGameState.deviceResetCounter);
+            }
+            applyRoleView(role);
+        };
+
+        // 初回読み込み時のロック判定
+        function checkDeviceInitialLock() {
+            const savedRole = localStorage.getItem('rpg_mdms_role');
+            if (savedRole && charData[savedRole]) {
+                // 初回読み込み時、同期用カウンターも上書きしてズレを防止
+                if (localGameState && localGameState.deviceResetCounter !== undefined) {
+                    localStorage.setItem('rpg_mdms_reset_sync', localGameState.deviceResetCounter);
+                }
+                applyRoleView(savedRole);
+            }
+        }
+
+        // 画面のパーツを完全に書き換えて移動を封じる
+        function applyRoleView(role) {
             currentRole = role;
-            document.querySelectorAll("#role-select-container button").forEach(btn => {
-                btn.classList.remove("border-indigo-500", "bg-indigo-950", "text-indigo-400");
-            });
-            document.getElementById(`btn-role-${role}`)?.classList.add("border-indigo-500", "bg-indigo-950", "text-indigo-400");
+
+            // 選択パネルを非表示にするだけでなく、中身を空にして「HTMLから完全に消滅」させる
+            const selectPanel = document.getElementById("role-select-panel");
+            if (selectPanel) {
+                selectPanel.innerHTML = ""; 
+                selectPanel.classList.add("hidden");
+            }
 
             const announce = document.getElementById("active-role-announcement");
             announce.classList.remove("hidden");
+            announce.innerHTML = `<span>あなたの担当： <span class="text-yellow-400 text-base ml-1">${charData[role].name}</span></span>
+                                  <span class="text-[11px] font-normal text-emerald-400 bg-emerald-950/60 border border-emerald-800 px-2 py-0.5 rounded-full">🔒 端末ロック有効化中</span>`;
 
             if (role === 'gm') {
-                announce.innerHTML = `👑 <strong>GM画面:</strong> リアルタイムログ消去工作、手動ステージ管理が行えます。`;
                 document.getElementById("gm-panel").classList.remove("hidden");
                 document.getElementById("player-panel").classList.add("hidden");
             } else {
-                announce.innerHTML = `🟢 <strong>${charData[role].name} 接続完了:</strong> 自分のカバンから装備をいつでも変更できます。`;
                 document.getElementById("gm-panel").classList.add("hidden");
                 document.getElementById("player-panel").classList.remove("hidden");
                 document.getElementById("secret-document-display").classList.add("hidden");
             }
             updateUI();
+        }
+
+        // 🔓 GMがリセットを押した時の検知
+        function checkDeviceResetEvent() {
+            if (localGameState.deviceResetCounter === undefined) return;
+            const currentSync = parseInt(localStorage.getItem('rpg_mdms_reset_sync') || "0");
+            
+            if (localGameState.deviceResetCounter > currentSync) {
+                localStorage.removeItem('rpg_mdms_role');
+                localStorage.setItem('rpg_mdms_reset_sync', localGameState.deviceResetCounter);
+                currentRole = null;
+                
+                // 画面を最初期状態に物理的に復活させる
+                const selectPanel = document.getElementById("role-select-panel");
+                if (selectPanel) {
+                    selectPanel.classList.remove("hidden");
+                    selectPanel.innerHTML = `
+                        <h2 class="text-base font-black text-indigo-400 uppercase tracking-wider mb-2 text-center">🎭 あなたの担当する役職（キャラクター）を選択</h2>
+                        <p class="text-xs text-center text-gray-400 mb-5">【注意】一度選ぶと、GMがリセットするまで他のキャラの画面へ移動することは一切できません！</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-5 gap-3" id="role-select-container">
+                            <button onclick="lockAndSelectRole('gm')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">👑 GM(主催者)</button>
+                            <button onclick="lockAndSelectRole('ninja')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">🥷 忍</button>
+                            <button onclick="lockAndSelectRole('demon')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">😈 悪魔</button>
+                            <button onclick="lockAndSelectRole('priest_bro')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">👦 神官兄</button>
+                            <button onclick="lockAndSelectRole('priest_sis')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">👧 神官妹</button>
+                        </div>
+                    `;
+                }
+                document.getElementById("active-role-announcement").classList.add("hidden");
+                document.getElementById("gm-panel").classList.add("hidden");
+                document.getElementById("player-panel").classList.add("hidden");
+            }
+        }
+
+        // 👑 GM用：全員の端末ロックを解除
+        window.triggerResetAllDevices = function() {
+            const nextCount = (localGameState.deviceResetCounter || 0) + 1;
+            update(ref(db, 'gameState'), { deviceResetCounter: nextCount });
+            sendAnnouncement(`📢 GMが全員の端末ロックを解除しました。キャラクターを選び直してください。`);
         };
+
 
         function updateUI() {
             if (!localGameState || !localGameState.stage) return;
@@ -436,7 +524,7 @@
             }
         }
 
-        // 🎒 装備変更処理 (カバンから装備を選んでステータスを再計算)
+        // 🎒 装備変更処理
         function equipItem(itemName) {
             if (!currentRole || currentRole === 'gm') return;
             const me = localGameState.players[currentRole];
@@ -462,9 +550,9 @@
             update(ref(db, `gameState/players/${currentRole}`), { isReady: !currentStatus });
         };
 
-        // 🔄 4人全員が準備完了したか自動チェックして次のステージへ
+        // 🔄 4人全員が準備完了したか自動チェック
         function checkAutoStageProgression() {
-            if (localGameState.bossHp > 0) return; // ボスが生きている間は進まない
+            if (localGameState.bossHp > 0) return;
             if (!localGameState.players) return;
 
             const roles = Object.keys(localGameState.players);
@@ -476,7 +564,6 @@
                     const nextStageName = currentTemplate.nextStage;
                     const nextTemplate = bossTemplates[nextStageName];
 
-                    // 全員の準備フラグをリセットして次のステージへ移行
                     const resetPlayers = {};
                     roles.forEach(r => {
                         resetPlayers[r] = { ...localGameState.players[r], isReady: false };
@@ -487,7 +574,8 @@
                         bossName: nextTemplate.name,
                         bossHp: nextTemplate.maxHp,
                         bossMaxHp: nextTemplate.maxHp,
-                        rescueBuffActive: false, // バフはリセット
+                        rescueBuffActive: false,
+                        deviceResetCounter: localGameState.deviceResetCounter || 0,
                         players: resetPlayers
                     });
 
@@ -499,7 +587,7 @@
         // 戦闘行動
         window.performAction = function(actionType) {
             if (!currentRole || currentRole === 'gm') return alert("キャラを選択してください。");
-            if (localGameState.bossHp <= 0) return alert("ボスはすに撃破されています。休憩・準備をしてください。");
+            if (localGameState.bossHp <= 0) return alert("ボスはすでに撃破されています。休憩・準備をしてください。");
 
             const pData = localGameState.players[currentRole];
             let damage = pData.atk;
