@@ -1,10 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>RPG×マダミス 開発用プロトタイプ</title>
-    <!-- Tailwind CSS -->
+    <title>RPG×マダミス 共有UI版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .custom-scroll::-webkit-scrollbar { width: 6px; }
@@ -20,363 +18,251 @@
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen font-sans antialiased pb-12">
 
-    <!-- ヘッダー -->
     <header class="bg-gray-800 border-b border-gray-700 p-4 sticky top-0 z-50 shadow-md">
-        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div>
-                <h1 class="text-xl font-bold text-indigo-400 flex items-center gap-2">
-                    ⚔️ RPG × マーダーミステリー <span class="text-xs bg-indigo-900 text-indigo-300 px-2 py-0.5 rounded border border-indigo-700">開発Ver6.0</span>
-                </h1>
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleModal(true)" id="btn-menu" class="hidden bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-bold transition shadow-md">
+                    ⚙️ メニュー
+                </button>
                 <div>
-                <h1 class="text-xl font-bold text-indigo-400 flex items-center gap-2">
-                    ⚔️ RPG × マーダーミステリー <span class="text-xs bg-indigo-900 text-indigo-300 px-2 py-0.5 rounded border border-indigo-700">開発Ver6.0</span>
-                </h1>
-                <p class="text-xs text-gray-400 mt-0.5">全5面・4フェーズ完全自動周回 ＆ 6面魔王城マダミス開示システム</p>
+                    <h1 class="text-xl font-bold text-indigo-400 flex items-center gap-2">
+                        ⚔️ RPG × マダミス <span class="text-xs bg-indigo-900 text-indigo-300 px-2 py-0.5 rounded border border-indigo-700">Ver7.0 共有UI</span>
+                    </h1>
+                </div>
             </div>
             
-            <button onclick="toggleModal(true)" class="bg-indigo-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-500 transition ml-4">
-                ⚙️ メニュー
-            </button>
-            ```
-
----
-
-### 2. ファイルの末尾にモーダルHTMLを追加する（約664行目付近）
-ファイルの最後、`</script>` タグの**直前**（または `</body>` の直前）に、モーダルの構造を追加します。
-
-```html
-<div id="personal-modal" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center p-4">
-        <div class="bg-gray-800 p-6 rounded-xl w-full max-w-lg border border-indigo-500 shadow-2xl h-[80vh] flex flex-col">
-            <h2 class="text-lg font-bold text-indigo-300 mb-4">ステータス・装備設定</h2>
-            <div class="flex gap-2 mb-4">
-                <button onclick="showTab('equip')" class="bg-gray-700 px-3 py-1 rounded text-xs">装備</button>
-                <button onclick="showTab('items')" class="bg-gray-700 px-3 py-1 rounded text-xs">所持品</button>
-                <button onclick="showTab('memo')" class="bg-gray-700 px-3 py-1 rounded text-xs">メモ</button>
-            </div>
-            <div id="modal-content" class="flex-grow overflow-y-auto custom-scroll text-sm space-y-4"></div>
-            <button onclick="toggleModal(false)" class="mt-4 w-full bg-gray-700 py-2 rounded-lg hover:bg-gray-600 font-bold">閉じる</button>
-        </div>
-    </div>
-                <p class="text-xs text-gray-400 mt-0.5">全5面・4フェーズ完全自動周回 ＆ 6面魔王城マダミス開示システム</p>
-            </div>
-            <!-- 現在の面 ＆ フェースステータス -->
-            <div class="flex flex-col sm:flex-row items-center gap-3 bg-gray-900 px-4 py-2 rounded-lg border border-gray-700">
-                <div class="flex items-center gap-2">
-                    <span class="text-xs text-gray-400 font-medium">進行状況:</span>
-                    <span id="current-stage-display" class="text-sm font-bold text-yellow-400">読み込み中...</span>
-                    <span id="current-phase-display" class="text-xs bg-indigo-950 text-indigo-300 border border-indigo-800 px-2 py-0.5 rounded font-bold">---</span>
+            <div class="flex flex-col items-end gap-2">
+                <div id="turn-order-container" class="hidden bg-gray-950 px-3 py-1.5 rounded-lg border border-gray-700 text-[11px] font-bold flex items-center gap-2">
+                    <span class="text-amber-400">⚡ 行動順:</span>
+                    <div id="turn-order-display" class="flex items-center gap-1.5"></div>
                 </div>
-                <!-- 準備OK状況の可視化 -->
-                <div id="ready-status-badges" class="flex gap-1.5 text-[10px]"></div>
+                <div class="flex items-center gap-3 bg-gray-900 px-4 py-1.5 rounded-lg border border-gray-700">
+                    <div class="flex items-center gap-2">
+                        <span id="current-stage-display" class="text-sm font-bold text-yellow-400">読込中...</span>
+                        <span id="current-phase-display" class="text-xs bg-indigo-950 text-indigo-300 border border-indigo-800 px-2 py-0.5 rounded font-bold">---</span>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-6 mt-4">
+    <main class="max-w-7xl mx-auto p-4 flex flex-col gap-6 mt-2">
         
-        <!-- 左側：役割選択、プレイヤー操作画面、および秘密のメモ (8コラム) -->
-        <div class="lg:col-span-8 flex flex-col gap-6">
+        <section id="role-select-panel" class="bg-gradient-to-br from-gray-800 to-gray-850 p-6 rounded-xl border-2 border-dashed border-indigo-500 shadow-xl max-w-4xl mx-auto w-full">
+            <h2 class="text-base font-black text-indigo-400 uppercase tracking-wider mb-2 text-center">🎭 担当するキャラクターを選択</h2>
+            <p class="text-xs text-center text-gray-400 mb-5">一度選ぶと、GMがリセットするまで変更できません。</p>
+            <div class="grid grid-cols-1 sm:grid-cols-5 gap-3" id="role-select-container">
+                <button onclick="lockAndSelectRole('gm')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">👑 GM(主催者)</button>
+                <button onclick="lockAndSelectRole('ninja')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">🥷 忍</button>
+                <button onclick="lockAndSelectRole('demon')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">😈 悪魔</button>
+                <button onclick="lockAndSelectRole('priest_bro')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">👦 神官兄</button>
+                <button onclick="lockAndSelectRole('priest_sis')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">👧 神官妹</button>
+            </div>
+        </section>
+
+        <div id="shared-main-view" class="hidden flex flex-col gap-6">
             
-            <!-- ① 役割選択パネル -->
-            <section id="role-select-panel" class="bg-gradient-to-br from-gray-800 to-gray-850 p-6 rounded-xl border-2 border-dashed border-indigo-500 shadow-xl">
-                <h2 class="text-base font-black text-indigo-400 uppercase tracking-wider mb-2 text-center">🎭 あなたの担当する役職（キャラクター）を選択</h2>
-                <p class="text-xs text-center text-gray-400 mb-5">【注意】一度選ぶと、GMがリセットするまで他のキャラの画面へ移動することは一切できません！</p>
-                <div class="grid grid-cols-1 sm:grid-cols-5 gap-3" id="role-select-container">
-                    <button onclick="lockAndSelectRole('gm')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">👑 GM(主催者)</button>
-                    <button onclick="lockAndSelectRole('ninja')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">🥷 忍</button>
-                    <button onclick="lockAndSelectRole('demon')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">😈 悪魔</button>
-                    <button onclick="lockAndSelectRole('priest_bro')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">👦 神官兄</button>
-                    <button onclick="lockAndSelectRole('priest_sis')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">👧 神官妹</button>
-                </div>
-            </section>
+            <div id="active-role-announcement" class="text-sm font-bold text-indigo-300 bg-indigo-950/80 px-4 py-3 rounded-xl border border-indigo-800 flex justify-between items-center shadow-inner"></div>
 
-            <!-- 選択済みキャラクターの永続表示バッジ -->
-            <div id="active-role-announcement" class="text-sm font-bold text-indigo-300 bg-indigo-950/80 px-4 py-3 rounded-xl border border-indigo-800 hidden flex justify-between items-center shadow-inner"></div>
-
-            <!-- プレイヤー用ゲーム画面 (GM以外に表示) -->
-            <section id="player-panel" class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-sm hidden flex flex-col gap-6">
-                <!-- ステータス表示 -->
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-gray-900 p-4 rounded-xl border border-gray-800">
-                    <div class="text-center">
-                        <p class="text-xs text-gray-400">現在のHP</p>
-                        <p class="text-xl font-black text-emerald-400" id="stat-hp">-- / --</p>
-                    </div>
-                    <div class="text-center">
-                        <p class="text-xs text-gray-400">必殺技SP</p>
-                        <p class="text-xl font-black text-purple-400" id="stat-sp">--%</p>
-                    </div>
-                    <div class="text-center">
-                        <p class="text-xs text-gray-400">現在の攻撃力</p>
-                        <p class="text-xl font-black text-amber-400" id="stat-atk">--</p>
-                    </div>
-                    <div class="text-center">
-                        <p class="text-xs text-gray-400">所持金 (ゴールド)</p>
-                        <p class="text-xl font-black text-yellow-400" id="stat-gold">-- G</p>
-                    </div>
-                </div>
-
-                <!-- 🎒 自分だけのインベントリ＆装備 -->
-                <div id="player-inventory-section" class="bg-gray-900 p-4 rounded-xl border border-gray-700">
-                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex justify-between items-center">
-                        <span>🎒 あなた専用のカバン ＆ 装備欄</span>
-                        <span class="text-[11px] text-amber-400 font-normal">現在装備中: <span id="current-equipped-text" class="font-bold">初期装備</span></span>
-                    </h3>
-                    <div id="inventory-list" class="flex flex-wrap gap-2"></div>
-                </div>
-
-                <!-- 🤝 休憩フェーズ専用セクション -->
-                <div id="ready-action-section" class="border-t border-gray-700 pt-4 hidden flex flex-col gap-4">
-                    <!-- 👁️ キャラクターの怪しい動き（自動開示） -->
-                    <div class="bg-purple-950/40 p-4 rounded-xl border border-purple-900/60">
-                        <h4 class="text-xs font-bold text-purple-400 uppercase tracking-wider mb-1 flex items-center gap-1">
-                            <span>👁️ 今この休憩中、不穏な影が動いた...</span>
-                        </h4>
-                        <p id="suspicious-move-text" class="text-xs text-purple-200 leading-relaxed italic"></p>
-                    </div>
-
-                    <!-- 🛒 ショップ -->
-                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-700">
-                        <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider mb-3 flex items-center gap-1">
-                            <span>🧙‍♂️ 闇の放浪商人「よくぞご無事で。イイモノ、ありまっせ…」</span>
-                        </h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div class="bg-gray-800 p-3 rounded-xl border border-gray-700 flex flex-col justify-between">
-                                <div>
-                                    <span class="text-[10px] bg-amber-950 text-amber-400 px-1.5 py-0.5 rounded font-bold">武器：バランス型</span>
-                                    <h4 class="font-bold text-gray-200 mt-1 text-xs">鋼鉄のブロードソード</h4>
-                                    <p class="text-[11px] text-gray-400 mt-0.5">装備すると攻撃力が「+15」になる。</p>
-                                </div>
-                                <button onclick="buyItem('iron_sword', 60)" class="mt-3 w-full bg-amber-700 hover:bg-amber-600 text-white text-xs font-bold py-1.5 px-2 rounded transition flex justify-between items-center">
-                                    <span>購入</span> <span class="text-yellow-300">60 G</span>
-                                </button>
-                            </div>
-                            <div class="bg-gray-800 p-3 rounded-xl border border-gray-700 flex flex-col justify-between">
-                                <div>
-                                    <span class="text-[10px] bg-red-950 text-red-400 px-1.5 py-0.5 rounded font-bold">武器：超火力型</span>
-                                    <h4 class="font-bold text-gray-200 mt-1 text-xs">魔王殺しのギガントアックス</h4>
-                                    <p class="text-[11px] text-gray-400 mt-0.5">装備すると攻撃力が「+40」になる。</p>
-                                </div>
-                                <button onclick="buyItem('giant_axe', 140)" class="mt-3 w-full bg-red-700 hover:bg-red-600 text-white text-xs font-bold py-1.5 px-2 rounded transition flex justify-between items-center">
-                                    <span>購入</span> <span class="text-yellow-300">140 G</span>
-                                </button>
-                            </div>
-                            <div class="bg-gray-800 p-3 rounded-xl border border-gray-700 flex flex-col justify-between">
-                                <div>
-                                    <span class="text-[10px] bg-indigo-950 text-indigo-400 px-1.5 py-0.5 rounded font-bold">機密情報</span>
-                                    <h4 class="font-bold text-gray-200 mt-1 text-xs">情報屋の身辺リーク（独占）</h4>
-                                    <p class="text-[11px] text-gray-400 mt-0.5">誰かの裏の顔。買った人の画面にだけ即表示。</p>
-                                </div>
-                                <button onclick="buyItem('info', 120)" class="mt-3 w-full bg-indigo-700 hover:bg-indigo-600 text-white text-xs font-bold py-1.5 px-2 rounded transition flex justify-between items-center">
-                                    <span>購入</span> <span class="text-yellow-300">120 G</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div id="secret-document-display" class="mt-4 p-4 bg-red-950/40 border border-red-900 rounded-lg text-xs text-red-200 hidden">
-                            <p class="font-bold text-red-400 mb-1">🤫 【あなただけに見えている極秘書類】</p>
-                            <p id="secret-document-text"></p>
-                        </div>
-                    </div>
-
-                    <!-- 準備完了トグルボタン -->
-                    <div class="bg-indigo-950/20 p-4 rounded-lg border border-indigo-900/40 text-center">
-                        <p class="text-xs text-indigo-300 mb-2">買い物や装備変更を終えたら、下のボタンを押して全員の準備完了を待ってください。</p>
-                        <button onclick="toggleReadyStatus()" id="btn-ready-toggle" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-6 rounded-lg text-sm transition shadow-md">
-                            次の戦闘の準備を完了する
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 戦闘アクション (mob_1, mob_2, bossで使用) -->
-                <div id="battle-actions-section" class="border-t border-gray-700 pt-4">
-                    <h3 class="text-sm font-bold text-gray-300 mb-3 flex items-center gap-1.5">⚔️ バトルアクション</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <button onclick="performAction('attack')" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold p-3 rounded-lg text-sm transition shadow-sm">
-                            通常攻撃を行う <span class="text-[10px] block font-normal text-red-200">💥 20%の確率でクリティカル！</span>
-                        </button>
-                        <button onclick="performAction('skill')" class="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white font-bold p-3 rounded-lg text-sm transition shadow-sm">
-                            固有スキルを発動！ <span class="text-[10px] block font-normal">消費SP: 50% / 火力2.5倍</span>
-                        </button>
-                        <button onclick="performAction('idle')" class="bg-gray-700 hover:bg-gray-600 text-gray-200 font-bold p-3 rounded-lg text-sm transition border border-gray-600">周囲を警戒する (パス) <span class="text-[10px] block font-normal text-gray-400">行動をスキップします</span></button>
-                    </div>
-                </div>
-
-                <!-- 6面用：マダミス大議論・告発フェーズ -->
-                <div id="mystery-section" class="border-t-4 border-red-700 bg-red-950/10 p-5 rounded-xl hidden flex flex-col gap-4">
-                    <div class="bg-red-900/30 p-4 rounded-xl border border-red-800 text-center">
-                        <h3 class="text-xl font-black text-red-400 mb-2">👑 第6面：魔王城に到達 ーー しかし、事件発生</h3>
-                        <p class="text-xs text-red-200 leading-relaxed max-w-2xl mx-auto">
-                            ついにたどり着いた魔王城の最深部。しかし、君たちが目にしたのは、すでに何者かによって引き裂かれた『魔王の死体』と、床に血で書かれた不気味なダイイングメッセージだった……。<br>
-                            魔王を殺したのは誰だ？目的は何だ？そして、道中不可解な動きをしていた裏切り者は……？<br>
-                            これより、すべての行動記録を開示し、最終議論を開始します。
-                        </p>
-                    </div>
-                    <div class="bg-gray-900 p-4 rounded-lg border border-gray-800">
-                        <p class="text-xs font-bold text-yellow-500 mb-2">📊 【全プレイヤーの完全行動履歴・大開示】</p>
-                        <div id="final-unveiled-logs" class="text-xs space-y-1.5 max-h-80 overflow-y-auto custom-scroll font-mono text-gray-300"></div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- GM用管理パネル -->
-            <section id="gm-panel" class="bg-gray-800 p-6 rounded-xl border-2 border-indigo-600 shadow-md hidden flex flex-col gap-6">
-                <div>
-                    <h2 class="text-base font-black text-indigo-400">👑 GM(ゲームマスター)専用コントロールパネル</h2>
-                </div>
-
-                <!-- 🔓 端末ロック解除ボタン -->
-                <div class="bg-amber-950/40 p-4 rounded-xl border border-amber-900">
-                    <h3 class="text-xs font-bold text-amber-400 mb-1">🔓 プレイヤー端末のロック強制解除</h3>
-                    <button onclick="triggerResetAllDevices()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold py-2 px-4 rounded transition">
-                        全員の端末ロックを解除して選び直させる
-                    </button>
-                </div>
-
-                <!-- ステージ手動変更機能 -->
-                <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">ゲーム進行の手動上書きコントロール</label>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        <button onclick="changeStageAndPhase(1, 'mob_1')" class="bg-gray-800 text-[11px] p-2 rounded border border-gray-700">1面：モブ1</button>
-                        <button onclick="changeStageAndPhase(1, 'rest')" class="bg-gray-800 text-[11px] p-2 rounded border border-gray-700">1面：休憩</button>
-                        <button onclick="changeStageAndPhase(1, 'boss')" class="bg-gray-800 text-[11px] p-2 rounded border border-gray-700">1面：ボス</button>
-                        <button onclick="changeStageAndPhase(2, 'mob_1')" class="bg-gray-800 text-[11px] p-2 rounded border border-gray-700">2面：モブ1</button>
-                        <button onclick="changeStageAndPhase(3, 'mob_1')" class="bg-gray-800 text-[11px] p-2 rounded border border-gray-700">3面：モブ1</button>
-                        <button onclick="changeStageAndPhase(4, 'mob_1')" class="bg-gray-800 text-[11px] p-2 rounded border border-gray-700">4面：モブ1</button>
-                        <button onclick="changeStageAndPhase(5, 'mob_1')" class="bg-gray-800 text-[11px] p-2 rounded border border-gray-700">5面：モブ1</button>
-                        <button onclick="changeStageAndPhase(5, 'boss')" class="bg-amber-900 text-[11px] text-white p-2 rounded border border-amber-700">5面：大ボス</button>
-                        <button onclick="changeStageAndPhase(6, 'mystery')" class="bg-red-900 text-[11px] text-white font-bold p-2 rounded border border-red-700">🔥 6面：マダミス</button>
-                    </div>
-                </div>
-
-                <!-- 全滅救済ボタン -->
-                <div class="bg-gray-900 p-4 rounded-xl border border-red-900">
-                    <h3 class="text-xs font-bold text-red-400 mb-1">💥 プレイヤー全滅時の救済措置</h3>
-                    <button onclick="triggerWipeRescue()" class="bg-gradient-to-r from-red-700 to-amber-700 text-white text-xs font-bold py-2 px-4 rounded transition">
-                        神の加護を発動（SP満タン＆1.2倍バフで即リトライ）
-                    </button>
-                </div>
-
-                <!-- 🤫 ログ監視＆消去機能 -->
-                <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
-                    <h3 class="text-xs font-bold text-indigo-400 mb-1">🤫 リアルタイム全ログ監視 ＆ 隠密抹消システム</h3>
-                    <div class="max-h-48 overflow-y-auto custom-scroll p-2 text-xs font-mono space-y-1 bg-gray-950 rounded" id="gm-log-monitor-list"></div>
-                </div>
-            </section>
-
-            <!-- 🔒 【全員共通・個別独立】秘密の個人メモ帳セクション (いつでも表示) -->
-            <section id="secret-memo-panel" class="bg-gray-800 p-5 rounded-xl border border-dashed border-gray-600 shadow-inner hidden">
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="text-sm font-black text-emerald-400 flex items-center gap-1.5">
-                        <span>🤫 他人には絶対に見えない「秘密の捜査メモ」</span>
-                    </h3>
-                    <span class="text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-900 px-2 py-0.5 rounded-full font-bold">ローカル端末保存</span>
-                </div>
-                <!-- メモ入力エリア -->
-                <div class="flex gap-2 mb-4">
-                    <input type="text" id="memo-input" placeholder="怪しい行動や、ひらめいた推理をメモ... (Enterで追加)" class="flex-grow bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-emerald-500">
-                    <button onclick="addPersonalMemo()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-lg transition shadow-md">追加</button>
-                </div>
-                <!-- メモ一覧 -->
-                <div id="memo-list-container" class="space-y-2 max-h-48 overflow-y-auto custom-scroll text-xs"></div>
-            </section>
-
-        </div>
-
-        <!-- 右側：ボスのステータスとゲーム内通知ログ -->
-        <div class="lg:col-span-4 flex flex-col gap-6">
-            <!-- 敵ステータス -->
-            <section id="enemy-status-panel" class="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow-sm text-center relative overflow-hidden">
-                <!-- クリティカル演出用の一瞬赤くなるレイヤー -->
-                <div id="crit-overlay" class="absolute inset-0 bg-red-600 opacity-0 pointer-events-none transition-opacity duration-200"></div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 
-                <h2 id="enemy-type-badge" class="text-xs font-bold text-red-400 uppercase tracking-wider mb-1">⚔️ エネミー生命力</h2>
-                <div class="text-3xl font-black text-red-500 my-2" id="boss-hp-display">--- / ---</div>
-                <div class="w-full bg-gray-900 h-2 rounded-full overflow-hidden border border-gray-800">
-                    <div id="boss-hp-bar" class="bg-gradient-to-r from-red-600 to-orange-500 h-full transition-all" style="width: 100%"></div>
+                <section class="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow-sm flex flex-col">
+                    <h2 class="text-sm font-bold text-gray-400 mb-3 flex justify-between items-center">
+                        <span>🛡️ パーティ状況</span>
+                        <div id="ready-status-badges" class="flex gap-1 text-[10px]"></div>
+                    </h2>
+                    <div id="party-list-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-grow">
+                        </div>
+                </section>
+
+                <section class="flex flex-col gap-4">
+                    <div id="enemy-status-panel" class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-sm text-center relative overflow-hidden">
+                        <div id="crit-overlay" class="absolute inset-0 bg-red-600 opacity-0 pointer-events-none transition-opacity duration-200"></div>
+                        <h2 id="enemy-type-badge" class="text-xs font-bold text-red-400 uppercase tracking-wider mb-2">⚔️ エネミー</h2>
+                        <div class="text-3xl font-black text-red-500 my-2" id="boss-hp-display">--- / ---</div>
+                        <div class="w-full bg-gray-900 h-3 rounded-full overflow-hidden border border-gray-800">
+                            <div id="boss-hp-bar" class="bg-gradient-to-r from-red-600 to-orange-500 h-full transition-all" style="width: 100%"></div>
+                        </div>
+                        <p id="boss-status-text" class="text-[11px] text-gray-400 mt-3 italic">読み込み中...</p>
+                        <div id="rescue-buff-badge" class="mt-2 inline-block text-[10px] bg-amber-950 text-amber-400 border border-amber-900 px-2 py-0.5 rounded font-bold hidden">✨ 神の加護(攻撃力1.2倍)発動中！</div>
+                    </div>
+                    
+                    <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-sm flex-grow flex flex-col">
+                        <h2 class="text-[11px] font-bold text-gray-400 mb-2">🔔 バトルログ</h2>
+                        <div id="announcement-box" class="bg-gray-950 p-2 rounded border border-gray-900 text-[11px] space-y-1.5 h-32 overflow-y-auto custom-scroll font-mono text-gray-400"></div>
+                    </div>
+                </section>
+            </div>
+
+            <section id="player-controls-panel" class="hidden">
+                <div id="battle-actions-section" class="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow-sm">
+                    <h3 class="text-sm font-bold text-gray-300 mb-3">⚔️ あなたのアクション</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <button onclick="performAction('attack')" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold p-3 rounded-lg text-sm transition shadow-sm">通常攻撃 <span class="text-[10px] block font-normal text-red-200">💥 20%で会心</span></button>
+                        <button onclick="performAction('skill')" class="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white font-bold p-3 rounded-lg text-sm transition shadow-sm">固有スキル <span class="text-[10px] block font-normal">消費SP: 50% / 火力2.5倍</span></button>
+                        <button onclick="performAction('idle')" class="bg-gray-700 hover:bg-gray-600 text-gray-200 font-bold p-3 rounded-lg text-sm transition border border-gray-600">警戒(パス) <span class="text-[10px] block font-normal text-gray-400">行動スキップ</span></button>
+                    </div>
                 </div>
-                <p id="boss-status-text" class="text-[11px] text-gray-400 mt-2 italic">読み込み中...</p>
-                <div id="rescue-buff-badge" class="mt-2 inline-block text-[10px] bg-amber-950 text-amber-400 border border-amber-900 px-2 py-0.5 rounded font-bold hidden">✨ 神の加護(攻撃力1.2倍)発動中！</div>
+
+                <div id="ready-action-section" class="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow-sm hidden flex-col gap-4">
+                    <div class="bg-purple-950/40 p-3 rounded border border-purple-900/60">
+                        <h4 class="text-xs font-bold text-purple-400 mb-1">👁️ 不穏な影</h4>
+                        <p id="suspicious-move-text" class="text-[11px] text-purple-200 italic"></p>
+                    </div>
+                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-700">
+                        <h4 class="text-xs font-bold text-amber-400 mb-3">🧙‍♂️ 闇の放浪商人 ショップ</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div class="bg-gray-800 p-3 rounded border border-gray-700 flex flex-col justify-between">
+                                <div><h4 class="font-bold text-gray-200 text-xs">鋼鉄のブロードソード</h4><p class="text-[10px] text-gray-400">攻撃力+15</p></div>
+                                <button onclick="buyItem('iron_sword', 60)" class="mt-2 w-full bg-amber-700 hover:bg-amber-600 text-white text-xs font-bold py-1 px-2 rounded flex justify-between"><span>購入</span><span class="text-yellow-300">60 G</span></button>
+                            </div>
+                            <div class="bg-gray-800 p-3 rounded border border-gray-700 flex flex-col justify-between">
+                                <div><h4 class="font-bold text-gray-200 text-xs">魔王殺しのギガントアックス</h4><p class="text-[10px] text-gray-400">攻撃力+40</p></div>
+                                <button onclick="buyItem('giant_axe', 140)" class="mt-2 w-full bg-red-700 hover:bg-red-600 text-white text-xs font-bold py-1 px-2 rounded flex justify-between"><span>購入</span><span class="text-yellow-300">140 G</span></button>
+                            </div>
+                            <div class="bg-gray-800 p-3 rounded border border-gray-700 flex flex-col justify-between">
+                                <div><h4 class="font-bold text-gray-200 text-xs">情報屋の身辺リーク</h4><p class="text-[10px] text-gray-400">機密情報</p></div>
+                                <button onclick="buyItem('info', 120)" class="mt-2 w-full bg-indigo-700 hover:bg-indigo-600 text-white text-xs font-bold py-1 px-2 rounded flex justify-between"><span>購入</span><span class="text-yellow-300">120 G</span></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-2">
+                        <button onclick="toggleReadyStatus()" id="btn-ready-toggle" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-6 rounded-lg text-sm transition shadow-md w-full sm:w-auto">次の戦闘の準備を完了する</button>
+                    </div>
+                </div>
             </section>
 
-            <!-- 演出用ログ -->
-            <section class="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow-sm flex flex-col flex-grow">
-                <h2 class="text-sm font-bold text-gray-300 mb-3">🔔 バトル演出・状況アナウンス</h2>
-                <div id="announcement-box" class="bg-gray-950 p-3 rounded-lg border border-gray-900 text-xs space-y-2 h-72 overflow-y-auto custom-scroll font-mono text-gray-400"></div>
+            <div id="mystery-section" class="border-t-4 border-red-700 bg-red-950/10 p-5 rounded-xl hidden flex flex-col gap-4">
+                <div class="bg-red-900/30 p-4 rounded-xl border border-red-800 text-center">
+                    <h3 class="text-xl font-black text-red-400 mb-2">👑 第6面：魔王城に到達 ーー しかし、事件発生</h3>
+                    <p class="text-xs text-red-200 leading-relaxed max-w-2xl mx-auto">
+                        魔王を殺したのは誰だ？目的は何だ？そして、道中不可解な動きをしていた裏切り者は……？<br>
+                        これより、すべての行動記録を開示し、最終議論を開始します。
+                    </p>
+                </div>
+                <div class="bg-gray-900 p-4 rounded-lg border border-gray-800">
+                    <p class="text-xs font-bold text-yellow-500 mb-2">📊 【全プレイヤーの完全行動履歴・大開示】</p>
+                    <div id="final-unveiled-logs" class="text-xs space-y-1.5 max-h-80 overflow-y-auto custom-scroll font-mono text-gray-300"></div>
+                </div>
+            </div>
+
+            <section id="gm-panel" class="bg-gray-800 p-6 rounded-xl border-2 border-indigo-600 shadow-md hidden flex flex-col gap-4">
+                <h2 class="text-base font-black text-indigo-400">👑 GM専用コントロールパネル</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button onclick="triggerResetAllDevices()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold py-2 px-4 rounded">全員の端末ロック解除</button>
+                    <button onclick="triggerWipeRescue()" class="bg-red-700 hover:bg-red-600 text-white text-xs font-bold py-2 px-4 rounded">全滅救済（HP/SP MAX＆バフ）</button>
+                </div>
+                <div class="bg-gray-900 p-3 rounded border border-gray-800">
+                    <label class="block text-xs font-bold text-gray-400 mb-2">ステージ強制移動</label>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="changeStageAndPhase(1, 'mob_1')" class="bg-gray-800 text-[10px] p-1.5 rounded border border-gray-700">1面:モブ1</button>
+                        <button onclick="changeStageAndPhase(1, 'rest')" class="bg-gray-800 text-[10px] p-1.5 rounded border border-gray-700">1面:休憩</button>
+                        <button onclick="changeStageAndPhase(5, 'boss')" class="bg-amber-900 text-white text-[10px] p-1.5 rounded border border-amber-700">5面:大ボス</button>
+                        <button onclick="changeStageAndPhase(6, 'mystery')" class="bg-red-900 text-white font-bold text-[10px] p-1.5 rounded border border-red-700">6面:マダミス</button>
+                    </div>
+                </div>
+                <div class="bg-gray-900 p-3 rounded border border-gray-800">
+                    <h3 class="text-xs font-bold text-indigo-400 mb-1">🤫 リアルタイム全ログ監視 ＆ 抹消</h3>
+                    <div class="max-h-40 overflow-y-auto custom-scroll p-2 text-[10px] font-mono space-y-1 bg-gray-950 rounded" id="gm-log-monitor-list"></div>
+                </div>
             </section>
         </div>
     </main>
+
+    <div id="personal-modal" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-gray-800 rounded-xl w-full max-w-lg border border-indigo-500 shadow-2xl h-[85vh] flex flex-col overflow-hidden">
+            <div class="bg-gray-900 p-4 border-b border-gray-700 flex justify-between items-center">
+                <h2 class="text-base font-bold text-indigo-300">ステータス・装備設定</h2>
+                <button onclick="toggleModal(false)" class="text-gray-400 hover:text-white text-xl font-bold px-2">&times;</button>
+            </div>
+            
+            <div class="p-4 bg-gray-800 border-b border-gray-700 grid grid-cols-4 gap-2 text-center">
+                <div class="bg-gray-900 p-2 rounded"><p class="text-[10px] text-gray-500">HP</p><p class="text-sm font-bold text-emerald-400" id="modal-stat-hp">-/-</p></div>
+                <div class="bg-gray-900 p-2 rounded"><p class="text-[10px] text-gray-500">SP</p><p class="text-sm font-bold text-purple-400" id="modal-stat-sp">-%</p></div>
+                <div class="bg-gray-900 p-2 rounded"><p class="text-[10px] text-gray-500">攻撃力</p><p class="text-sm font-bold text-amber-400" id="modal-stat-atk">-</p></div>
+                <div class="bg-gray-900 p-2 rounded"><p class="text-[10px] text-gray-500">所持金</p><p class="text-sm font-bold text-yellow-400" id="modal-stat-gold">-G</p></div>
+            </div>
+
+            <div class="flex p-3 gap-2 bg-gray-850">
+                <button onclick="showModalTab('equip')" id="tab-btn-equip" class="flex-1 bg-indigo-600 text-white py-1.5 rounded text-xs font-bold transition">装備変更</button>
+                <button onclick="showModalTab('memo')" id="tab-btn-memo" class="flex-1 bg-gray-700 text-gray-300 py-1.5 rounded text-xs font-bold transition">秘密のメモ</button>
+                <button onclick="showModalTab('secret')" id="tab-btn-secret" class="flex-1 bg-gray-700 text-gray-300 py-1.5 rounded text-xs font-bold transition">極秘書類</button>
+            </div>
+
+            <div id="modal-content" class="flex-grow overflow-y-auto custom-scroll p-4 text-sm bg-gray-800">
+                </div>
+        </div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, onValue, push, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // --------------------------------------------------
-        // [重要] あなたのFirebaseの設定情報に書き換えてください
-        // --------------------------------------------------
         const firebaseConfig = {
-   apiKey: "AIzaSyAukrEescGPA2dPIZc4IJtXJYYie2uuW1A",
-  authDomain: "rpg-murder.firebaseapp.com",
-  databaseURL: "https://rpg-murder-default-rtdb.firebaseio.com",
-  projectId: "rpg-murder",
-  storageBucket: "rpg-murder.firebasestorage.app",
-  messagingSenderId: "397842198430",
-  appId: "1:397842198430:web:3c8c2137dcc1e8650a708f"
-
+            apiKey: "AIzaSyAukrEescGPA2dPIZc4IJtXJYYie2uuW1A",
+            authDomain: "rpg-murder.firebaseapp.com",
+            databaseURL: "https://rpg-murder-default-rtdb.firebaseio.com",
+            projectId: "rpg-murder",
+            storageBucket: "rpg-murder.firebasestorage.app",
+            messagingSenderId: "397842198430",
+            appId: "1:397842198430:web:3c8c2137dcc1e8650a708f"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // キャラクター固有データ
+        // キャラクター固有データ (表示名など)
         const charData = {
-            gm: { name: "👑 GM(ゲームマスター)" },
-            ninja: { name: "🥷 忍", secret: "【忍の秘密】東の国からの密書：『魔王の討伐後、どさくさに紛れて氷姫を暗殺せよ。』" },
-            demon: { name: "😈 悪魔", secret: "【悪魔の秘密】ちぎれた魔王の肖像画：かつて魔王の右腕だった。魔王の死の真相を探っている。" },
-            priest_bro: { name: "👦 神官兄", secret: "【神官兄の秘密】禁忌の魔術書の破片：『魂なき器にかりそめの命を与える呪術』。姫の遺体を動かしていた？" },
-            priest_sis: { name: "👧 神官妹", secret: "【神官妹の秘密】血のついた日記帳：『氷の一族が故郷を滅ぼした。姫を絶対に許さない』。" }
+            gm: { name: "👑 GM", icon: "👑" },
+            ninja: { name: "🥷 忍", icon: "🥷", secret: "【忍の秘密】東の国からの密書：『魔王の討伐後、どさくさに紛れて氷姫を暗殺せよ。』" },
+            demon: { name: "😈 悪魔", icon: "😈", secret: "【悪魔の秘密】ちぎれた魔王の肖像画：かつて魔王の右腕だった。魔王の死の真相を探っている。" },
+            priest_bro: { name: "👦 神官兄", icon: "👦", secret: "【神官兄の秘密】禁忌の魔術書の破片：『魂なき器にかりそめの命を与える呪術』。姫の遺体を動かしていた？" },
+            priest_sis: { name: "👧 神官妹", icon: "👧", secret: "【神官妹の秘密】血のついた日記帳：『氷の一族が故郷を滅ぼした。姫を絶対に許さない』。" }
         };
 
-        // 全5面×4フェーズ＋6面のマスターデータ
+        // 【機能追加】エネミーにも素早さ(agi)を設定
         const stageMasterData = {
             1: {
-                mob_1: { name: "砦の猟犬", hp: 120, goldReward: 30 },
-                mob_2: { name: "砦の斥候兵", hp: 160, goldReward: 40 },
-                rest: { suspicious: "【1面の不審な影】休憩中、忍が何やら懐から奇妙な暗号文を取り出し、解読したあとに慌てて暖炉の火に投げ入れているのを神官妹が目撃した。" },
-                boss: { name: "砦の防衛総督ガルバ", hp: 450 }
+                mob_1: { name: "砦の猟犬", hp: 120, goldReward: 30, agi: 25 },
+                mob_2: { name: "砦の斥候兵", hp: 160, goldReward: 40, agi: 35 },
+                rest: { suspicious: "【1面の不審な影】休憩中、忍が何やら懐から奇妙な暗号文を取り出し、解読したあとに慌てて暖炉の火に投げ入れているのを目撃した。" },
+                boss: { name: "砦の防衛総督ガルバ", hp: 450, agi: 45 }
             },
             2: {
-                mob_1: { name: "迷い出たゾンビ", hp: 180, goldReward: 40 },
-                mob_2: { name: "腐食の死霊騎士", hp: 220, goldReward: 50 },
-                rest: { suspicious: "【2面の不審な影】物資調達の際、悪魔が『とある魔族の紋章が入ったペンダント』を見つけ、激しく動揺した様子で懐に隠すのを神官兄が目撃した。" },
-                boss: { name: "深紅の魔騎士レオン", hp: 650 }
+                mob_1: { name: "迷い出たゾンビ", hp: 180, goldReward: 40, agi: 28 },
+                mob_2: { name: "腐食の死霊騎士", hp: 220, goldReward: 50, agi: 38 },
+                rest: { suspicious: "【2面の不審な影】物資調達の際、悪魔が『とある魔族の紋章が入ったペンダント』を見つけ、激しく動揺した様子で懐に隠すのを目撃した。" },
+                boss: { name: "深紅の魔騎士レオン", hp: 650, agi: 48 }
             },
             3: {
-                mob_1: { name: "毒霧の幼生蜘蛛", hp: 240, goldReward: 50 },
-                mob_2: { name: "幻惑の怪魔マフラー", hp: 280, goldReward: 60 },
-                rest: { suspicious: "【3面の不審な影】霧が晴れる一瞬、神官兄が『魂なき器にかりそめの命を吹き込む』と書かれた黒い魔術書の破片を凝視し、怪しく微笑んでいたのを忍が見てしまった。" },
-                boss: { name: "巨大狂蜘蛛アラクネ", hp: 850 }
+                mob_1: { name: "毒霧の幼生蜘蛛", hp: 240, goldReward: 50, agi: 30 },
+                mob_2: { name: "幻惑の怪魔マフラー", hp: 280, goldReward: 60, agi: 40 },
+                rest: { suspicious: "【3面の不審な影】霧が晴れる一瞬、神官兄が黒い魔術書の破片を凝視し、怪しく微笑んでいたのを見てしまった。" },
+                boss: { name: "巨大狂蜘蛛アラクネ", hp: 850, agi: 50 }
             },
             4: {
-                mob_1: { name: "魔界の特攻足軽", hp: 320, goldReward: 60 },
-                mob_2: { name: "魔界の大盾重装兵", hp: 380, goldReward: 70 },
-                rest: { suspicious: "【4面の不審な影】宿営地での夜、神官妹が血の滲んだ古い日記帳を抱きしめながら『氷の一族め、絶対に許さない……』と怨念を呟いているのを悪魔が聞いてしまった。" },
-                boss: { name: "突撃魔導要塞要撃機", hp: 1100 }
+                mob_1: { name: "魔界の特攻足軽", hp: 320, goldReward: 60, agi: 35 },
+                mob_2: { name: "魔界の大盾重装兵", hp: 380, goldReward: 70, agi: 45 },
+                rest: { suspicious: "【4面の不審な影】宿営地での夜、神官妹が血の滲んだ古い日記帳を抱きしめ怨念を呟いているのを聞いてしまった。" },
+                boss: { name: "突撃魔導要塞要撃機", hp: 1100, agi: 55 }
             },
             5: {
-                mob_1: { name: "幻影の魔女・第一の影", hp: 400, goldReward: 80 },
-                mob_2: { name: "幻影の魔女・第二の影", hp: 450, goldReward: 90 },
-                rest: { suspicious: "【5面の不審な影】最後の取引の裏で、全員の荷物から少しずつ『魔王城の結界石』が消えていることが発覚した。誰かが事前に結界を破るか、あるいは……？" },
-                boss: { name: "大至高・幻影の魔女", hp: 1800 }
+                mob_1: { name: "幻影の魔女・第一の影", hp: 400, goldReward: 80, agi: 40 },
+                mob_2: { name: "幻影の魔女・第二の影", hp: 450, goldReward: 90, agi: 50 },
+                rest: { suspicious: "【5面の不審な影】最後の取引の裏で、全員の荷物から少しずつ『魔王城の結界石』が消えていることが発覚した。" },
+                boss: { name: "大至高・幻影の魔女", hp: 1800, agi: 60 }
             }
         };
 
         let currentRole = null;
         let localGameState = {};
         let isFirstLoad = true;
+        let currentModalTab = 'equip';
 
         // 🔄 Firebaseデータベース購読・初期化
         onValue(ref(db, 'gameState'), (snapshot) => {
             if (!snapshot.exists()) {
-                // 初期データ作成
+                // 初期データ作成 (プレイヤーにもagiを追加)
                 set(ref(db, 'gameState'), {
                     currentStage: 1,
                     currentPhase: "mob_1",
@@ -386,10 +272,10 @@
                     rescueBuffActive: false,
                     deviceResetCounter: 0,
                     players: {
-                        ninja: { hp: 120, maxHp: 120, baseAtk: 15, atk: 15, gold: 0, sp: 0, equipped: "初期のクナイ", inventory: ["初期のクナイ"], isReady: false },
-                        demon: { hp: 150, maxHp: 150, baseAtk: 20, atk: 20, gold: 0, sp: 0, equipped: "見習いの杖", inventory: ["見習いの杖"], isReady: false },
-                        priest_bro: { hp: 200, maxHp: 200, baseAtk: 10, atk: 10, gold: 0, sp: 0, equipped: "古びた盾", inventory: ["古びた盾"], isReady: false },
-                        priest_sis: { hp: 100, maxHp: 100, baseAtk: 8, atk: 8, gold: 0, sp: 0, equipped: "ただの棒", inventory: ["ただの棒"], isReady: false }
+                        ninja: { hp: 120, maxHp: 120, baseAtk: 15, atk: 15, gold: 0, sp: 0, agi: 50, equipped: "初期のクナイ", inventory: ["初期のクナイ"], isReady: false },
+                        demon: { hp: 150, maxHp: 150, baseAtk: 20, atk: 20, gold: 0, sp: 0, agi: 40, equipped: "見習いの杖", inventory: ["見習いの杖"], isReady: false },
+                        priest_bro: { hp: 200, maxHp: 200, baseAtk: 10, atk: 10, gold: 0, sp: 0, agi: 30, equipped: "古びた盾", inventory: ["古びた盾"], isReady: false },
+                        priest_sis: { hp: 100, maxHp: 100, baseAtk: 8, atk: 8, gold: 0, sp: 0, agi: 20, equipped: "ただの棒", inventory: ["ただの棒"], isReady: false }
                     }
                 });
             } else {
@@ -401,10 +287,13 @@
                     checkDeviceResetEvent();
                 }
                 updateUI();
+                if (document.getElementById("personal-modal").classList.contains("hidden") === false) {
+                    renderModalContent(); // モーダルが開いていれば更新
+                }
             }
         });
 
-        // アナウンスログ購読
+        // ログ監視関連
         onValue(ref(db, 'announcements'), (snapshot) => {
             const box = document.getElementById("announcement-box");
             box.innerHTML = "";
@@ -412,95 +301,73 @@
                 const logs = Object.values(snapshot.val());
                 logs.forEach(log => {
                     const div = document.createElement("div");
-                    div.className = "border-b border-gray-900 pb-1 text-[11px]";
-                    if (log.includes("💥")) {
-                        div.className += " text-yellow-400 font-bold bg-amber-950/20 px-1 rounded";
-                    }
+                    div.className = "border-b border-gray-800 pb-1";
+                    if (log.includes("💥")) div.className += " text-yellow-400 font-bold bg-amber-950/20 px-1 rounded";
                     div.innerText = log;
                     box.appendChild(div);
                 });
                 box.scrollTop = box.scrollHeight;
-
-                const lastLog = logs[logs.length - 1];
-                if (lastLog && lastLog.includes("💥")) {
-                    triggerCriticalFlashEffect();
-                }
+                if (logs[logs.length - 1] && logs[logs.length - 1].includes("💥")) triggerCriticalFlashEffect();
             }
         });
 
-        // 行動履歴ログ監視
         onValue(ref(db, 'actionLogs'), (snapshot) => {
             const gmLogList = document.getElementById("gm-log-monitor-list");
             const finalLogList = document.getElementById("final-unveiled-logs");
-            gmLogList.innerHTML = "";
-            finalLogList.innerHTML = "";
+            if (gmLogList) gmLogList.innerHTML = "";
+            if (finalLogList) finalLogList.innerHTML = "";
 
             if (snapshot.exists()) {
                 Object.entries(snapshot.val()).forEach(([id, logObj]) => {
                     const stageTag = logObj.stage === 6 ? "6面魔王城" : `${logObj.stage}面-${logObj.phase || ''}`;
                     const fullText = `[${stageTag}] ${logObj.actor}: ${logObj.actionText}`;
 
-                    // GM消去用
-                    const gmRow = document.createElement("div");
-                    gmRow.className = "flex justify-between items-center bg-gray-900 p-1 rounded gap-2";
-                    gmRow.innerHTML = `<span class="truncate">${fullText}</span><button class="bg-red-950 hover:bg-red-800 text-[10px] text-red-300 px-1 py-0.5 rounded border border-red-900">抹消</button>`;
-                    gmRow.querySelector("button").addEventListener("click", () => {
-                        remove(ref(db, `actionLogs/${id}`));
-                        sendAnnouncement(`👑 GMが世界の時間軸を修正しました(ログ1件抹消)。`);
-                    });
-                    gmLogList.appendChild(gmRow);
-
-                    // 6面大開示用
-                    const playerRow = document.createElement("div");
-                    playerRow.className = "bg-gray-950 p-1 rounded border border-gray-900";
-                    playerRow.innerText = fullText;
-                    finalLogList.appendChild(playerRow);
+                    if (gmLogList) {
+                        const gmRow = document.createElement("div");
+                        gmRow.className = "flex justify-between items-center bg-gray-900 p-1 rounded gap-2";
+                        gmRow.innerHTML = `<span class="truncate">${fullText}</span><button class="bg-red-950 hover:bg-red-800 text-red-300 px-1 py-0.5 rounded border border-red-900">消去</button>`;
+                        gmRow.querySelector("button").addEventListener("click", () => remove(ref(db, `actionLogs/${id}`)));
+                        gmLogList.appendChild(gmRow);
+                    }
+                    if (finalLogList) {
+                        const playerRow = document.createElement("div");
+                        playerRow.className = "bg-gray-950 p-1.5 rounded border border-gray-900";
+                        playerRow.innerText = fullText;
+                        finalLogList.appendChild(playerRow);
+                    }
                 });
             }
         });
 
-        // 🎭 役職ロック選択
+        // 🎭 役職ロック
         window.lockAndSelectRole = function(role) {
             localStorage.setItem('rpg_mdms_role', role);
-            if (localGameState && localGameState.deviceResetCounter !== undefined) {
-                localStorage.setItem('rpg_mdms_reset_sync', localGameState.deviceResetCounter);
-            }
+            if (localGameState.deviceResetCounter !== undefined) localStorage.setItem('rpg_mdms_reset_sync', localGameState.deviceResetCounter);
             applyRoleView(role);
         };
 
         function checkDeviceInitialLock() {
             const savedRole = localStorage.getItem('rpg_mdms_role');
-            if (savedRole && charData[savedRole]) {
-                if (localGameState && localGameState.deviceResetCounter !== undefined) {
-                    localStorage.setItem('rpg_mdms_reset_sync', localGameState.deviceResetCounter);
-                }
-                applyRoleView(savedRole);
-            }
+            if (savedRole && charData[savedRole]) applyRoleView(savedRole);
         }
 
         function applyRoleView(role) {
             currentRole = role;
-            const selectPanel = document.getElementById("role-select-panel");
-            if (selectPanel) {
-                selectPanel.innerHTML = ""; 
-                selectPanel.classList.add("hidden");
-            }
-
+            document.getElementById("role-select-panel").classList.add("hidden");
+            document.getElementById("shared-main-view").classList.remove("hidden");
+            
             const announce = document.getElementById("active-role-announcement");
-            announce.classList.remove("hidden");
             announce.innerHTML = `<span>あなたの担当： <span class="text-yellow-400 text-base ml-1">${charData[role].name}</span></span>
-                                  <span class="text-[11px] font-normal text-emerald-400 bg-emerald-950/60 border border-emerald-800 px-2 py-0.5 rounded-full">🔒 端末ロック有効化中</span>`;
-
-            document.getElementById("secret-memo-panel").classList.remove("hidden");
-            renderMemos(); 
+                                  <span class="text-[10px] text-emerald-400 bg-emerald-950/60 border border-emerald-800 px-2 py-0.5 rounded-full">端末ロック中</span>`;
 
             if (role === 'gm') {
                 document.getElementById("gm-panel").classList.remove("hidden");
-                document.getElementById("player-panel").classList.add("hidden");
+                document.getElementById("player-controls-panel").classList.add("hidden");
+                document.getElementById("btn-menu").classList.add("hidden");
             } else {
                 document.getElementById("gm-panel").classList.add("hidden");
-                document.getElementById("player-panel").classList.remove("hidden");
-                document.getElementById("secret-document-display").classList.add("hidden");
+                document.getElementById("player-controls-panel").classList.remove("hidden");
+                document.getElementById("btn-menu").classList.remove("hidden");
             }
             updateUI();
         }
@@ -508,521 +375,374 @@
         function checkDeviceResetEvent() {
             if (localGameState.deviceResetCounter === undefined) return;
             const currentSync = parseInt(localStorage.getItem('rpg_mdms_reset_sync') || "0");
-            
             if (localGameState.deviceResetCounter > currentSync) {
                 localStorage.removeItem('rpg_mdms_role');
                 localStorage.setItem('rpg_mdms_reset_sync', localGameState.deviceResetCounter);
                 currentRole = null;
-                
-                const selectPanel = document.getElementById("role-select-panel");
-                if (selectPanel) {
-                    selectPanel.classList.remove("hidden");
-                    selectPanel.innerHTML = `
-                        <h2 class="text-base font-black text-indigo-400 uppercase tracking-wider mb-2 text-center">🎭 あなたの担当する役職（キャラクター）を選択</h2>
-                        <p class="text-xs text-center text-gray-400 mb-5">【注意】一度選ぶと、GMがリセットするまで他のキャラの画面へ移動することは一切できません！</p>
-                        <div class="grid grid-cols-1 sm:grid-cols-5 gap-3" id="role-select-container">
-                            <button onclick="lockAndSelectRole('gm')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">👑 GM(主催者)</button>
-                            <button onclick="lockAndSelectRole('ninja')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">🥷 忍</button>
-                            <button onclick="lockAndSelectRole('demon')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">😈 悪魔</button>
-                            <button onclick="lockAndSelectRole('priest_bro')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">👦 神官兄</button>
-                            <button onclick="lockAndSelectRole('priest_sis')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">👧 神官妹</button>
-                        </div>
-                    `;
-                }
-                document.getElementById("active-role-announcement").classList.add("hidden");
-                document.getElementById("gm-panel").classList.add("hidden");
-                document.getElementById("player-panel").classList.add("hidden");
-                document.getElementById("secret-memo-panel").classList.add("hidden");
+                document.getElementById("role-select-panel").classList.remove("hidden");
+                document.getElementById("shared-main-view").classList.add("hidden");
+                document.getElementById("btn-menu").classList.add("hidden");
+                toggleModal(false);
             }
         }
 
-        window.triggerResetAllDevices = function() {
-            const nextCount = (localGameState.deviceResetCounter || 0) + 1;
-            update(ref(db, 'gameState'), { deviceResetCounter: nextCount });
-            sendAnnouncement(`📢 GMが全員の端末ロックを解除しました。キャラクターを選び直してください。`);
-        };
+        window.triggerResetAllDevices = () => update(ref(db, 'gameState'), { deviceResetCounter: (localGameState.deviceResetCounter || 0) + 1 });
 
-        // 🔄 全画面UI更新ロジック
+        // 🔄 メインUI更新 ＆ パーティ・素早さの共有表示
         function updateUI() {
-            if (!localGameState || !localGameState.currentStage) return;
+            if (!localGameState.currentStage || !localGameState.players) return;
 
             const stage = localGameState.currentStage;
             const phase = localGameState.currentPhase;
 
-            // ヘッダーテキスト変換
             document.getElementById("current-stage-display").innerText = stage === 6 ? "第6面：最終章" : `第${stage}面`;
-            
-            let phaseText = "不明";
-            if (phase === "mob_1") phaseText = "⚔️ 前哨戦：モブ1";
-            if (phase === "mob_2") phaseText = "⚔️ 前哨戦：モブ2";
-            if (phase === "rest") phaseText = "🛡️ 休憩所：ショップ＆疑惑";
-            if (phase === "boss") phaseText = "🔥 決戦：エリアボス";
-            if (phase === "mystery") phaseText = "🚨 マダミス最終大議論";
+            let phaseText = { "mob_1": "前哨戦1", "mob_2": "前哨戦2", "rest": "休憩所", "boss": "エリアボス", "mystery": "最終議論" }[phase] || "不明";
             document.getElementById("current-phase-display").innerText = phaseText;
 
-            // 6面（マダミス議論）の条件分岐
+            // --- パーティ一覧のレンダリング (共有画面の左側) ---
+            const partyContainer = document.getElementById("party-list-container");
+            partyContainer.innerHTML = "";
+            Object.entries(localGameState.players).forEach(([key, p]) => {
+                const isMe = key === currentRole;
+                const hpPercent = p.maxHp > 0 ? (p.hp / p.maxHp) * 100 : 0;
+                partyContainer.innerHTML += `
+                    <div class="bg-gray-900 p-3 rounded-lg border ${isMe ? 'border-indigo-500' : 'border-gray-700'} flex flex-col gap-2 relative">
+                        ${isMe ? '<span class="absolute -top-2 -right-2 bg-indigo-600 text-white text-[9px] px-1.5 rounded-full">YOU</span>' : ''}
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-sm ${p.hp <= 0 ? 'text-gray-500 line-through' : 'text-gray-200'}">${charData[key].icon} ${charData[key].name.split(' ')[1]}</span>
+                            <span class="text-[10px] text-gray-400 bg-gray-800 px-1.5 rounded border border-gray-700 truncate max-w-[80px]">${p.equipped}</span>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-[10px] mb-0.5"><span class="text-emerald-400">HP</span><span class="text-gray-300">${p.hp}/${p.maxHp}</span></div>
+                            <div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden"><div class="bg-emerald-500 h-full" style="width: ${hpPercent}%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-[10px] mb-0.5"><span class="text-purple-400">SP</span><span class="text-gray-300">${p.sp}%</span></div>
+                            <div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden"><div class="bg-purple-500 h-full" style="width: ${p.sp}%"></div></div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // --- 素早さ(AGI)に基づく行動順の計算と表示 (ヘッダー右上) ---
+            const turnOrder = [];
+            Object.entries(localGameState.players).forEach(([key, p]) => {
+                if(p.hp > 0) turnOrder.push({ name: charData[key].icon, agi: p.agi, type: 'player' });
+            });
+
+            // 敵のAGIを取得してリストに追加（休憩と6面以外）
+            let enemyAgi = 0;
+            if (phase !== 'rest' && stage !== 6) {
+                const stgData = stageMasterData[stage]?.[phase];
+                if (stgData) enemyAgi = stgData.agi || 10;
+                if (localGameState.enemyHp > 0) turnOrder.push({ name: "👹", agi: enemyAgi, type: 'enemy' });
+            }
+
+            turnOrder.sort((a, b) => b.agi - a.agi); // 降順ソート
+            const turnDisplay = document.getElementById("turn-order-display");
+            const turnContainer = document.getElementById("turn-order-container");
+            if (turnOrder.length > 0 && phase !== 'rest' && stage !== 6) {
+                turnContainer.classList.remove("hidden");
+                turnDisplay.innerHTML = turnOrder.map(t => `<span class="${t.type === 'enemy' ? 'text-red-400 text-sm drop-shadow-[0_0_2px_red]' : 'text-gray-200'}">${t.name}</span>`).join('<span class="text-gray-600 text-[8px]">▶</span>');
+            } else {
+                turnContainer.classList.add("hidden");
+            }
+
+            // --- 敵ステータスの表示 ---
             if (stage === 6 || phase === "mystery") {
                 document.getElementById("enemy-status-panel").classList.add("hidden");
-                document.getElementById("player-inventory-section").classList.add("hidden");
-                document.getElementById("battle-actions-section").classList.add("hidden");
-                document.getElementById("ready-action-section").classList.add("hidden");
+                document.getElementById("player-controls-panel").classList.add("hidden");
                 document.getElementById("mystery-section").classList.remove("hidden");
-                return;
-            }
-
-            // 通常ステージ表示
-            document.getElementById("enemy-status-panel").classList.remove("hidden");
-            document.getElementById("player-inventory-section").classList.remove("hidden");
-            document.getElementById("mystery-section").classList.add("hidden");
-
-            // エネミー情報描画
-            const bHp = localGameState.enemyHp;
-            const bMax = localGameState.enemyMaxHp;
-            document.getElementById("boss-hp-display").innerText = `${bHp} / ${bMax}`;
-            document.getElementById("boss-hp-bar").style.width = `${bMax > 0 ? (bHp / bMax) * 100 : 0}%`;
-
-            if (phase === "rest") {
-                document.getElementById("enemy-type-badge").innerText = "☕ 放浪商人の安全地帯";
-                document.getElementById("boss-status-text").innerText = "現在敵はいません。情報・装備を整えて準備完了してください。";
-                document.getElementById("battle-actions-section").classList.add("hidden");
-                document.getElementById("ready-action-section").classList.remove("hidden");
-                
-                // 不審な動きの流し込み
-                const currentStageData = stageMasterData[stage];
-                if (currentStageData && currentStageData.rest) {
-                    document.getElementById("suspicious-move-text").innerText = currentStageData.rest.suspicious;
-                }
             } else {
-                document.getElementById("enemy-type-badge").innerText = phase === "boss" ? "👹 エリアボス生命力" : "👾 襲撃モブ生命力";
-                document.getElementById("boss-status-text").innerText = `目の前に「${localGameState.enemyName}」が立ちはだかっている！`;
-                document.getElementById("battle-actions-section").classList.remove("hidden");
-                document.getElementById("ready-action-section").classList.add("hidden");
-            }
+                document.getElementById("enemy-status-panel").classList.remove("hidden");
+                if(currentRole && currentRole !== 'gm') document.getElementById("player-controls-panel").classList.remove("hidden");
+                document.getElementById("mystery-section").classList.add("hidden");
 
-            // バフバッジ
+                const bHp = localGameState.enemyHp;
+                const bMax = localGameState.enemyMaxHp;
+                document.getElementById("boss-hp-display").innerText = `${bHp} / ${bMax}`;
+                document.getElementById("boss-hp-bar").style.width = `${bMax > 0 ? (bHp / bMax) * 100 : 0}%`;
+
+                if (phase === "rest") {
+                    document.getElementById("enemy-type-badge").innerText = "☕ 安全地帯";
+                    document.getElementById("boss-status-text").innerText = "現在敵はいません。ショップを利用し準備完了してください。";
+                    document.getElementById("battle-actions-section").classList.add("hidden");
+                    document.getElementById("ready-action-section").classList.remove("hidden");
+                    document.getElementById("ready-action-section").classList.add("flex");
+                    if (stageMasterData[stage]?.rest) document.getElementById("suspicious-move-text").innerText = stageMasterData[stage].rest.suspicious;
+                } else {
+                    document.getElementById("enemy-type-badge").innerText = phase === "boss" ? "👹 エリアボス" : "👾 襲撃モブ";
+                    document.getElementById("boss-status-text").innerText = `「${localGameState.enemyName}」が立ちはだかっている！`;
+                    document.getElementById("battle-actions-section").classList.remove("hidden");
+                    document.getElementById("ready-action-section").classList.add("hidden");
+                    document.getElementById("ready-action-section").classList.remove("flex");
+                }
+            }
             document.getElementById("rescue-buff-badge").classList.toggle("hidden", !localGameState.rescueBuffActive);
 
-            // 準備完了インジケータ
+            // --- 準備完了バッジ ---
             const badgesContainer = document.getElementById("ready-status-badges");
             badgesContainer.innerHTML = "";
-            if (localGameState.players) {
-                Object.entries(localGameState.players).forEach(([key, p]) => {
-                    const span = document.createElement("span");
-                    span.className = p.isReady ? "bg-indigo-900 text-indigo-300 px-1.5 py-0.5 rounded border border-indigo-700 font-bold" : "bg-gray-800 text-gray-500 px-1.5 py-0.5 rounded border border-gray-700";
-                    span.innerText = `${key === 'ninja' ? '忍' : key === 'demon' ? '悪魔' : key === 'priest_bro' ? '兄' : '妹'}${p.isReady ? '✔' : '⏳'}`;
-                    badgesContainer.appendChild(span);
-                });
-            }
+            Object.entries(localGameState.players).forEach(([key, p]) => {
+                const span = document.createElement("span");
+                span.className = p.isReady ? "bg-indigo-900 text-indigo-300 px-1.5 py-0.5 rounded font-bold" : "bg-gray-800 text-gray-500 px-1.5 py-0.5 rounded";
+                span.innerText = `${charData[key].name.split(' ')[1]}${p.isReady ? '✔' : '⏳'}`;
+                badgesContainer.appendChild(span);
+            });
 
-            // プレイヤー自身データの同期反映
-            if (currentRole && currentRole !== 'gm' && localGameState.players?.[currentRole]) {
+            // --- プレイヤー操作パネルの更新 ---
+            if (currentRole && currentRole !== 'gm') {
                 const me = localGameState.players[currentRole];
-                document.getElementById("stat-hp").innerText = `${me.hp} / ${me.maxHp}`;
-                document.getElementById("stat-sp").innerText = `${me.sp}%`;
-                document.getElementById("stat-gold").innerText = `${me.gold} G`;
-                document.getElementById("current-equipped-text").innerText = me.equipped || "初期装備";
-
-                let finalAtk = me.atk;
-                if (localGameState.rescueBuffActive) {
-                    finalAtk = Math.floor(finalAtk * 1.2);
-                    document.getElementById("stat-atk").innerHTML = `${finalAtk} <span class="text-[10px] text-amber-500 font-normal">(1.2倍バフ)</span>`;
-                } else {
-                    document.getElementById("stat-atk").innerText = finalAtk;
-                }
-
-                // カバン一覧のレンダリング
-                const invList = document.getElementById("inventory-list");
-                invList.innerHTML = "";
-                if (me.inventory) {
-                    me.inventory.forEach(item => {
-                        const isEquipped = (me.equipped === item);
-                        const btn = document.createElement("button");
-                        btn.className = `text-xs px-2.5 py-1 rounded border transition font-medium ${isEquipped ? 'bg-amber-950 text-amber-400 border-amber-600 font-bold' : 'bg-gray-800 text-gray-300 border-gray-700 hover:bg-gray-700'}`;
-                        btn.innerText = item + (isEquipped ? " (装備中)" : "");
-                        if (!isEquipped) btn.onclick = () => equipItem(item);
-                        invList.appendChild(btn);
-                    });
-                }
-
-                // 準備完了ボタン表示変更
                 const readyBtn = document.getElementById("btn-ready-toggle");
                 if (me.isReady) {
                     readyBtn.innerText = "準備を「一時解除」する";
-                    readyBtn.className = "bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-2 px-6 rounded-lg text-sm transition shadow-md";
+                    readyBtn.className = "bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-2 px-6 rounded-lg text-sm transition shadow-md w-full sm:w-auto";
                 } else {
                     readyBtn.innerText = "次の戦闘の準備を完了する";
-                    readyBtn.className = "bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-6 rounded-lg text-sm transition shadow-md";
+                    readyBtn.className = "bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-6 rounded-lg text-sm transition shadow-md w-full sm:w-auto";
                 }
             }
         }
 
-        // 🎒 装備変更処理
-        function equipItem(itemName) {
+        // ==========================================
+        // ★ メニュー・モーダル機能 (個人詳細)
+        // ==========================================
+        window.toggleModal = (show) => {
             if (!currentRole || currentRole === 'gm') return;
+            const modal = document.getElementById("personal-modal");
+            modal.classList.toggle("hidden", !show);
+            if (show) {
+                showModalTab('equip');
+                renderModalContent();
+            }
+        };
+
+        window.showModalTab = (tab) => {
+            currentModalTab = tab;
+            ["equip", "memo", "secret"].forEach(t => {
+                const btn = document.getElementById(`tab-btn-${t}`);
+                if (t === tab) {
+                    btn.classList.replace("bg-gray-700", "bg-indigo-600");
+                    btn.classList.replace("text-gray-300", "text-white");
+                } else {
+                    btn.classList.replace("bg-indigo-600", "bg-gray-700");
+                    btn.classList.replace("text-white", "text-gray-300");
+                }
+            });
+            renderModalContent();
+        };
+
+        function renderModalContent() {
+            if (!currentRole || currentRole === 'gm' || !localGameState.players) return;
+            const me = localGameState.players[currentRole];
+            
+            // 上部のステータス更新
+            document.getElementById("modal-stat-hp").innerText = `${me.hp}/${me.maxHp}`;
+            document.getElementById("modal-stat-sp").innerText = `${me.sp}%`;
+            let finalAtk = me.atk;
+            if (localGameState.rescueBuffActive) finalAtk = Math.floor(finalAtk * 1.2);
+            document.getElementById("modal-stat-atk").innerText = finalAtk;
+            document.getElementById("modal-stat-gold").innerText = `${me.gold}G`;
+
+            const content = document.getElementById("modal-content");
+            content.innerHTML = "";
+
+            if (currentModalTab === 'equip') {
+                content.innerHTML = `
+                    <h3 class="text-xs font-bold text-gray-400 mb-3 border-b border-gray-700 pb-1">🎒 所持品 ＆ 装備</h3>
+                    <div class="grid grid-cols-1 gap-2">
+                        ${me.inventory ? me.inventory.map(item => {
+                            const isEq = me.equipped === item;
+                            return `
+                            <div class="bg-gray-900 p-3 rounded-lg border ${isEq ? 'border-amber-600' : 'border-gray-700'} flex justify-between items-center">
+                                <div>
+                                    <p class="text-sm font-bold ${isEq ? 'text-amber-400' : 'text-gray-200'}">${item} ${isEq ? '<span class="text-[10px] bg-amber-900 text-amber-200 px-1 rounded ml-1">装備中</span>' : ''}</p>
+                                </div>
+                                ${!isEq ? `<button onclick="equipItem('${item}')" class="bg-gray-700 hover:bg-gray-600 text-xs px-3 py-1.5 rounded transition">装備する</button>` : ''}
+                            </div>
+                            `;
+                        }).join('') : '<p class="text-gray-500 text-xs">アイテムを持っていません。</p>'}
+                    </div>
+                `;
+            } else if (currentModalTab === 'memo') {
+                content.innerHTML = `
+                    <h3 class="text-xs font-bold text-gray-400 mb-3 border-b border-gray-700 pb-1">🤫 秘密の捜査メモ (自分のみ)</h3>
+                    <div class="flex gap-2 mb-4">
+                        <input type="text" id="modal-memo-input" placeholder="推理を入力..." class="flex-grow bg-gray-900 border border-gray-700 rounded px-2 text-xs text-white">
+                        <button onclick="addPersonalMemoModal()" class="bg-emerald-600 px-3 py-1.5 rounded text-xs font-bold">追加</button>
+                    </div>
+                    <div id="modal-memo-list" class="space-y-2 text-xs"></div>
+                `;
+                renderMemosModal();
+                document.getElementById("modal-memo-input").addEventListener("keydown", (e) => { if(e.key === "Enter") addPersonalMemoModal(); });
+            } else if (currentModalTab === 'secret') {
+                content.innerHTML = `
+                    <h3 class="text-xs font-bold text-gray-400 mb-3 border-b border-gray-700 pb-1">📜 あなたが知る極秘情報</h3>
+                    <div class="bg-red-950/40 p-4 border border-red-900 rounded-lg text-red-200 text-xs leading-relaxed">
+                        ${charData[currentRole].secret}
+                    </div>
+                    <p class="text-[10px] text-gray-500 mt-2 text-center">※情報屋から買った情報もここに表示されます（現状は初期秘密のみ）</p>
+                `;
+            }
+        }
+
+        window.equipItem = function(itemName) {
             const me = localGameState.players[currentRole];
             let addedAtk = 0;
             if (itemName === "鋼鉄のブロードソード") addedAtk = 15;
             if (itemName === "魔王殺しのギガントアックス") addedAtk = 40;
-
             const newAtk = me.baseAtk + addedAtk;
             update(ref(db, `gameState/players/${currentRole}`), { equipped: itemName, atk: newAtk });
-            pushActionLog(charData[currentRole].name, `装備欄を開き、メイン装備を「${itemName}」に切り替えた。(攻撃力:${newAtk})`);
+            pushActionLog(charData[currentRole].name, `装備を「${itemName}」に変更した。`);
+        };
+
+        // モーダル内のメモ機能
+        window.addPersonalMemoModal = function() {
+            const input = document.getElementById("modal-memo-input");
+            if (!input.value.trim()) return;
+            const storageKey = `rpg_mdms_memo_${currentRole}`;
+            const existingMemos = JSON.parse(localStorage.getItem(storageKey) || "[]");
+            existingMemos.push({ id: Date.now(), stage: `${localGameState.currentStage}面`, content: input.value.trim() });
+            localStorage.setItem(storageKey, JSON.stringify(existingMemos));
+            renderMemosModal();
+        };
+
+        window.deletePersonalMemoModal = function(id) {
+            const storageKey = `rpg_mdms_memo_${currentRole}`;
+            let existingMemos = JSON.parse(localStorage.getItem(storageKey) || "[]");
+            localStorage.setItem(storageKey, JSON.stringify(existingMemos.filter(m => m.id !== id)));
+            renderMemosModal();
+        };
+
+        function renderMemosModal() {
+            const container = document.getElementById("modal-memo-list");
+            if(!container) return;
+            const memos = JSON.parse(localStorage.getItem(`rpg_mdms_memo_${currentRole}`) || "[]");
+            container.innerHTML = memos.map(m => `
+                <div class="bg-gray-900 p-2 rounded flex justify-between border border-gray-700">
+                    <div><span class="text-[9px] bg-gray-800 text-gray-400 px-1 rounded mr-1">${m.stage}</span><span class="text-gray-200">${m.content}</span></div>
+                    <button onclick="deletePersonalMemoModal(${m.id})" class="text-gray-500 hover:text-red-400 px-1">✕</button>
+                </div>
+            `).join('') || '<p class="text-gray-500 italic text-center py-2">メモはありません。</p>';
         }
 
-        // 🤝 準備完了ハンドラ ＆ 自動次フェーズ遷移
+        // ==========================================
+        // バトル・進行ロジック (既存維持)
+        // ==========================================
         window.toggleReadyStatus = function() {
             if (!currentRole || currentRole === 'gm') return;
-            const currentStatus = localGameState.players[currentRole].isReady || false;
-            const nextStatus = !currentStatus;
-
-            update(ref(db, `gameState/players/${currentRole}`), { isReady: nextStatus }).then(() => {
-                // 即座に全員が準備完了したか検知
-                checkAndTriggerNextPhase();
-            });
+            update(ref(db, `gameState/players/${currentRole}`), { isReady: !localGameState.players[currentRole].isReady }).then(checkAndTriggerNextPhase);
         };
 
         function checkAndTriggerNextPhase() {
-            // 安全策の再取得チェック
-            if (localGameState.currentPhase !== "rest") return;
-            const players = localGameState.players;
-            if (!players) return;
-
-            const roles = Object.keys(players);
-            const allReady = roles.every(r => players[r].isReady === true);
-
-            if (allReady && roles.length > 0) {
-                const currentStage = localGameState.currentStage;
-                const nextData = stageMasterData[currentStage].boss;
-
-                // 全員の準備フラグを回収リセットしてボスフェースへ
+            if (localGameState.currentPhase !== "rest" || !localGameState.players) return;
+            const roles = Object.keys(localGameState.players);
+            if (roles.every(r => localGameState.players[r].isReady)) {
                 const resetPlayers = {};
-                roles.forEach(r => {
-                    resetPlayers[r] = { ...players[r], isReady: false };
-                });
-
-                update(ref(db, 'gameState'), {
-                    currentPhase: "boss",
-                    enemyName: nextData.name,
-                    enemyHp: nextData.hp,
-                    enemyMaxHp: nextData.hp,
-                    players: resetPlayers
-                });
-
-                sendAnnouncement(`🚨 全員の戦闘準備完了！ 休憩を終了し、第${currentStage}面のボス「${nextData.name}」が出現しました！`);
+                roles.forEach(r => resetPlayers[r] = { ...localGameState.players[r], isReady: false });
+                const nextData = stageMasterData[localGameState.currentStage].boss;
+                update(ref(db, 'gameState'), { currentPhase: "boss", enemyName: nextData.name, enemyHp: nextData.hp, enemyMaxHp: nextData.hp, players: resetPlayers });
+                sendAnnouncement(`🚨 準備完了！ ボス「${nextData.name}」が出現！`);
             }
         }
 
-        // ⚔️ 攻撃・自動進行エンジン
         window.performAction = function(actionType) {
-            if (!currentRole || currentRole === 'gm') return alert("担当キャラクターを選んでください。");
-            if (localGameState.currentPhase === "rest" || localGameState.currentStage === 6) return alert("現在は戦闘フェーズではありません。");
+            if (!currentRole || currentRole === 'gm') return;
+            if (localGameState.currentPhase === "rest" || localGameState.currentStage === 6) return alert("戦闘フェーズではありません。");
 
             const pData = localGameState.players[currentRole];
             let damage = pData.atk;
             if (localGameState.rescueBuffActive) damage = Math.floor(damage * 1.2);
 
             if (actionType === 'attack') {
-                const isCritical = Math.random() < 0.20; 
-                let logMessage = "";
-                let announceMessage = "";
-
-                if (isCritical) {
-                    damage = damage * 2;
-                    logMessage = `💥会心の一撃！ボスの弱点を見抜き【${damage}】の特大ダメージ！(SP+20%)`;
-                    announceMessage = `💥 ⚡CRITICAL HIT⚡ ${charData[currentRole].name} の渾身の一撃！ 【${damage}】ダメージ！`;
-                } else {
-                    logMessage = `通常攻撃を繰り出し、敵に【${damage}】ダメージを与えた。(SP+20%)`;
-                    announceMessage = `⚔️ ${charData[currentRole].name} の攻撃、敵に ${damage} ダメージ。`;
-                }
-
-                const newSp = Math.min((pData.sp || 0) + 20, 100);
-                const nextHp = Math.max(localGameState.enemyHp - damage, 0);
-
-                update(ref(db, `gameState/players/${currentRole}`), { sp: newSp });
-                pushActionLog(charData[currentRole].name, logMessage);
-                sendAnnouncement(announceMessage);
+                const isCrit = Math.random() < 0.20; 
+                if (isCrit) damage *= 2;
+                update(ref(db, `gameState/players/${currentRole}`), { sp: Math.min((pData.sp || 0) + 20, 100) });
+                pushActionLog(charData[currentRole].name, isCrit ? `💥会心！【${damage}】ダメージ！` : `攻撃し【${damage}】ダメージ！`);
+                sendAnnouncement(isCrit ? `💥 ⚡CRITICAL⚡ ${charData[currentRole].name} の攻撃！ 【${damage}】ダメージ！` : `⚔️ ${charData[currentRole].name} の攻撃、${damage} ダメージ。`);
                 
-                // 敵HPが0になったらフェーズ判定へ
-                if (nextHp <= 0) {
-                    handleEnemyDefeat(nextHp);
-                } else {
-                    update(ref(db, 'gameState'), { enemyHp: nextHp });
-                }
+                const nextHp = Math.max(localGameState.enemyHp - damage, 0);
+                nextHp <= 0 ? handleEnemyDefeat() : update(ref(db, 'gameState'), { enemyHp: nextHp });
 
             } else if (actionType === 'skill') {
-                if ((pData.sp || 0) < 50) return alert("SPが50%未満のため発動できません！");
-                let skillDmg = Math.floor(damage * 2.5);
-                const nextHp = Math.max(localGameState.enemyHp - skillDmg, 0);
-
+                if ((pData.sp || 0) < 50) return alert("SPが50%未満です！");
+                damage = Math.floor(damage * 2.5);
                 update(ref(db, `gameState/players/${currentRole}`), { sp: (pData.sp || 0) - 50 });
-                pushActionLog(charData[currentRole].name, `🔥 秘奥義・固有スキルを解放！敵を粉砕し【${skillDmg}】ダメージ！`);
-                sendAnnouncement(`🔥 ${charData[currentRole].name} の必殺スキル炸裂！！ 敵へ 【${skillDmg}】 の壊滅的ダメージ！`);
+                pushActionLog(charData[currentRole].name, `🔥 固有スキル！【${damage}】ダメージ！`);
+                sendAnnouncement(`🔥 ${charData[currentRole].name} の必殺スキル！ 【${damage}】 ダメージ！`);
+                
+                const nextHp = Math.max(localGameState.enemyHp - damage, 0);
+                nextHp <= 0 ? handleEnemyDefeat() : update(ref(db, 'gameState'), { enemyHp: nextHp });
 
-                if (nextHp <= 0) {
-                    handleEnemyDefeat(nextHp);
-                } else {
-                    update(ref(db, 'gameState'), { enemyHp: nextHp });
-                }
             } else if (actionType === 'idle') {
-                pushActionLog(charData[currentRole].name, `周囲の気配を警戒し、あえて行動せず静観した。(パス)`);
-                sendAnnouncement(`💤 ${charData[currentRole].name} は呼吸を整えて様子を見ている。`);
+                pushActionLog(charData[currentRole].name, `警戒し、行動をパスした。`);
+                sendAnnouncement(`💤 ${charData[currentRole].name} は様子を見ている。`);
             }
         };
 
-        // 💀 敵死亡時の自動フェーズ移行コア
-        function handleEnemyDefeat(zeroHp) {
-            const currentStage = localGameState.currentStage;
-            const currentPhase = localGameState.currentPhase;
-            const players = localGameState.players;
+        function handleEnemyDefeat() {
+            const stg = localGameState.currentStage;
+            const phs = localGameState.currentPhase;
+            let nextStg = stg, nextPhs = "", eName = "", eHp = 0;
+            
+            let gb = 0;
+            if (phs === "mob_1") gb = stageMasterData[stg].mob_1.goldReward;
+            else if (phs === "mob_2") gb = stageMasterData[stg].mob_2.goldReward;
 
-            let nextStage = currentStage;
-            let nextPhase = "";
-            let nextEnemyName = "";
-            let nextEnemyHp = 0;
-
-            let goldBonus = 0;
-            // モブ戦の場合はトドメを刺したフェーズの報酬を分配するため取得
-            if (currentPhase === "mob_1" && stageMasterData[currentStage].mob_1.goldReward) {
-                goldBonus = stageMasterData[currentStage].mob_1.goldReward;
-            } else if (currentPhase === "mob_2" && stageMasterData[currentStage].mob_2.goldReward) {
-                goldBonus = stageMasterData[currentStage].mob_2.goldReward;
-            }
-
-            // ゴールド報酬の付与(生存プレイヤー全員に等倍、あるいはトドメを刺した人のログを出すために全員一律支給)
-            const updatedPlayers = { ...players };
-            if (goldBonus > 0) {
-                Object.keys(updatedPlayers).forEach(r => {
-                    updatedPlayers[r].gold = (updatedPlayers[r].gold || 0) + goldBonus;
-                    updatedPlayers[r].isReady = false; // 念のためリセット
-                });
-                sendAnnouncement(`💰 エネミーを撃破した！全員が戦利品として 【${goldBonus} G】 を獲得した！`);
-            } else {
-                // ボス撃破時はリセット
-                Object.keys(updatedPlayers).forEach(r => {
-                    updatedPlayers[r].isReady = false;
-                });
-            }
-
-            // 条件分岐
-            if (currentPhase === "mob_1") {
-                nextPhase = "mob_2";
-                const m2 = stageMasterData[currentStage].mob_2;
-                nextEnemyName = m2.name;
-                nextEnemyHp = m2.hp;
-                sendAnnouncement(`⚔️ 前哨戦1をクリア！ 続けざまに「${nextEnemyName}」が襲いかかってきた！`);
-            } 
-            else if (currentPhase === "mob_2") {
-                nextPhase = "rest";
-                nextEnemyName = "安全地帯（敵なし）";
-                nextEnemyHp = 0;
-                sendAnnouncement(`🛡️ 前哨戦の防衛に成功！ 周辺の安全を確保し、一時的に「休憩所（商人登場）」へ移行しました。`);
-            } 
-            else if (currentPhase === "boss") {
-                if (currentStage === 5) {
-                    nextStage = 6;
-                    nextPhase = "mystery";
-                    nextEnemyName = "事件発生（戦闘終了）";
-                    nextEnemyHp = 0;
-                    sendAnnouncement(`👑 大ボス【幻影の魔女】の完全討伐に成功！！ 魔王城の封印が解かれました。`);
-                } else {
-                    nextStage = currentStage + 1;
-                    nextPhase = "mob_1";
-                    const m1 = stageMasterData[nextStage].mob_1;
-                    nextEnemyName = m1.name;
-                    nextEnemyHp = m1.hp;
-                    sendAnnouncement(`🎉 見事に第${currentStage}面のボスを撃破！ 自動的に第${nextStage}面へと進軍します。`);
-                }
-            }
-
-            // Firebaseへ一括書き込み更新
-            set(ref(db, 'gameState'), {
-                currentStage: nextStage,
-                currentPhase: nextPhase,
-                enemyName: nextEnemyName,
-                enemyHp: nextEnemyHp,
-                enemyMaxHp: nextEnemyHp,
-                rescueBuffActive: localGameState.rescueBuffActive,
-                deviceResetCounter: localGameState.deviceResetCounter || 0,
-                players: updatedPlayers
+            const uPlayers = { ...localGameState.players };
+            Object.keys(uPlayers).forEach(r => {
+                if(gb > 0) uPlayers[r].gold = (uPlayers[r].gold || 0) + gb;
+                uPlayers[r].isReady = false;
             });
+            if(gb > 0) sendAnnouncement(`💰 敵を撃破！全員 【${gb} G】 獲得！`);
+
+            if (phs === "mob_1") {
+                nextPhs = "mob_2"; eName = stageMasterData[stg].mob_2.name; eHp = stageMasterData[stg].mob_2.hp;
+                sendAnnouncement(`⚔️ 前哨戦1クリア！ 次の敵が出現！`);
+            } else if (phs === "mob_2") {
+                nextPhs = "rest"; eName = "安全地帯"; eHp = 0;
+                sendAnnouncement(`🛡️ 前哨戦クリア！ 休憩所へ移行しました。`);
+            } else if (phs === "boss") {
+                if (stg === 5) { nextStg = 6; nextPhs = "mystery"; sendAnnouncement(`👑 大ボス討伐！ 魔王城の封印が解かれた！`); }
+                else { nextStg = stg + 1; nextPhs = "mob_1"; eName = stageMasterData[nextStg].mob_1.name; eHp = stageMasterData[nextStg].mob_1.hp; sendAnnouncement(`🎉 第${stg}面ボス撃破！ 次の面へ進軍！`); }
+            }
+
+            set(ref(db, 'gameState'), { currentStage: nextStg, currentPhase: nextPhs, enemyName: eName, enemyHp: eHp, enemyMaxHp: eHp, rescueBuffActive: localGameState.rescueBuffActive, deviceResetCounter: localGameState.deviceResetCounter || 0, players: uPlayers });
         }
 
-        // 🛒 アイテム・秘密購入ロジック
         window.buyItem = function(itemType, cost) {
-            if (!currentRole || currentRole === 'gm') return alert("キャラを選択してください。");
             const pData = localGameState.players[currentRole];
-            if (pData.gold < cost) return alert("ゴールドが不足しています！モブを倒して稼いでください。");
-
-            let newGold = pData.gold - cost;
-            let currentInv = pData.inventory ? [...pData.inventory] : [];
-
-            if (itemType === 'iron_sword') {
-                currentInv.push("鋼鉄のブロードソード");
-                update(ref(db, `gameState/players/${currentRole}`), { gold: newGold, inventory: currentInv });
-                pushActionLog(charData[currentRole].name, `ショップで「鋼鉄のブロードソード」を ${cost}G で購入。`);
-                alert("購入完了！上のカバン欄からいつでも装備できます。");
-            } 
-            else if (itemType === 'giant_axe') {
-                currentInv.push("魔王殺しのギガントアックス");
-                update(ref(db, `gameState/players/${currentRole}`), { gold: newGold, inventory: currentInv });
-                pushActionLog(charData[currentRole].name, `ショップで「魔王殺しのギガントアックス」を ${cost}G で購入。`);
-                alert("購入完了！上のカバン欄からいつでも装備できます。");
-            } 
-            else if (itemType === 'info') {
-                update(ref(db, `gameState/players/${currentRole}`), { gold: newGold });
-                pushActionLog(charData[currentRole].name, `闇の商人に ${cost}G の賄賂を渡し、極秘の身辺リーク情報を買い取った。`);
-                sendAnnouncement(`🛒 【密告】${charData[currentRole].name} が商人とコソコソ裏取引を行い、秘密の書類を手に入れたようだ。`);
-                
-                document.getElementById("secret-document-text").innerText = charData[currentRole].secret;
-                document.getElementById("secret-document-display").classList.remove("hidden");
+            if (pData.gold < cost) return alert("G不足！");
+            let inv = pData.inventory ? [...pData.inventory] : [];
+            if (itemType === 'iron_sword' || itemType === 'giant_axe') {
+                const n = itemType === 'iron_sword' ? "鋼鉄のブロードソード" : "魔王殺しのギガントアックス";
+                inv.push(n);
+                update(ref(db, `gameState/players/${currentRole}`), { gold: pData.gold - cost, inventory: inv });
+                pushActionLog(charData[currentRole].name, `「${n}」を購入。`);
+                alert(`購入完了！左上の「⚙️メニュー」から装備を変更してください。`);
+            } else if (itemType === 'info') {
+                update(ref(db, `gameState/players/${currentRole}`), { gold: pData.gold - cost });
+                sendAnnouncement(`🛒 【密告】${charData[currentRole].name} が商人と裏取引を行った。`);
+                alert("極秘情報を入手しました。左上の「⚙️メニュー」→「極秘書類」を確認してください。");
             }
         };
 
-        // 👑 GM用：ステージ強制書き換え
-        window.changeStageAndPhase = function(stageNum, phaseName) {
-            let enemyName = "マダミス議論";
-            let enemyHp = 0;
-
-            if (stageNum <= 5) {
-                if (phaseName === 'mob_1') {
-                    enemyName = stageMasterData[stageNum].mob_1.name;
-                    enemyHp = stageMasterData[stageNum].mob_1.hp;
-                } else if (phaseName === 'mob_2') {
-                    enemyName = stageMasterData[stageNum].mob_2.name;
-                    enemyHp = stageMasterData[stageNum].mob_2.hp;
-                } else if (phaseName === 'boss') {
-                    enemyName = stageMasterData[stageNum].boss.name;
-                    enemyHp = stageMasterData[stageNum].boss.hp;
-                } else {
-                    enemyName = "安全地帯（敵なし）";
-                    enemyHp = 0;
-                }
-            }
-
-            update(ref(db, 'gameState'), {
-                currentStage: stageNum,
-                currentPhase: phaseName,
-                enemyName: enemyName,
-                enemyHp: enemyHp,
-                enemyMaxHp: enemyHp,
-                rescueBuffActive: false
-            });
-            sendAnnouncement(`📢 GM特権：ゲーム状況が強制的に【${stageNum}面 / ${phaseName}】へ上書きされました。`);
+        window.changeStageAndPhase = (s, p) => {
+            const data = p === 'rest' || p === 'mystery' ? { name: p==='rest'?"安全地帯":"マダミス議論", hp:0 } : stageMasterData[s][p];
+            update(ref(db, 'gameState'), { currentStage: s, currentPhase: p, enemyName: data.name, enemyHp: data.hp, enemyMaxHp: data.hp });
         };
 
-        // 👑 GM用：全滅レスキュー
-        window.triggerWipeRescue = function() {
-            if (!localGameState.players) return;
-            const updatedPlayers = {};
-            Object.entries(localGameState.players).forEach(([k, d]) => {
-                updatedPlayers[k] = { ...d, hp: d.maxHp, sp: 100 };
-            });
-            update(ref(db, 'gameState'), {
-                players: updatedPlayers,
-                enemyHp: localGameState.enemyMaxHp,
-                rescueBuffActive: true
-            });
-            sendAnnouncement(`✨ GM神の加護発動！全員のHP・SPがMAXで蘇生され、この戦いのみ攻撃力1.2倍バフが適用されます！`);
+        window.triggerWipeRescue = () => {
+            const uP = {}; Object.entries(localGameState.players).forEach(([k, d]) => uP[k] = { ...d, hp: d.maxHp, sp: 100 });
+            update(ref(db, 'gameState'), { players: uP, enemyHp: localGameState.enemyMaxHp, rescueBuffActive: true });
         };
 
-        // アニメーション用フラッシュ
         function triggerCriticalFlashEffect() {
             const overlay = document.getElementById("crit-overlay");
-            if (!overlay) return;
-            overlay.style.opacity = "0.5";
-            setTimeout(() => { overlay.style.opacity = "0"; }, 200);
+            if (overlay) { overlay.style.opacity = "0.5"; setTimeout(() => { overlay.style.opacity = "0"; }, 200); }
         }
-
-        // ログ書き込み
-        function pushActionLog(actorName, actionText) {
-            push(ref(db, 'actionLogs'), {
-                stage: localGameState.currentStage,
-                phase: localGameState.currentPhase,
-                actor: actorName,
-                actionText: actionText
-            });
-        }
-
-        function sendAnnouncement(text) {
-            push(ref(db, 'announcements'), text);
-        }
-
-        // 🔒 秘密のマイメモ ロジック
-        window.addPersonalMemo = function() {
-            const input = document.getElementById("memo-input");
-            const text = input.value.trim();
-            if (!text || !currentRole) return;
-
-            const storageKey = `rpg_mdms_memo_${currentRole}`;
-            const existingMemos = JSON.parse(localStorage.getItem(storageKey) || "[]");
-
-            const phaseLabel = localGameState.currentPhase === 'rest' ? '休憩' : '戦闘';
-            existingMemos.push({
-                id: Date.now(),
-                stage: `${localGameState.currentStage}面-${phaseLabel}`,
-                content: text
-            });
-
-            localStorage.setItem(storageKey, JSON.stringify(existingMemos));
-            input.value = ""; 
-            renderMemos();
-        };
-
-        document.getElementById("memo-input").addEventListener("keydown", (e) => {
-            if (e.key === "Enter") addPersonalMemo();
-        });
-
-        window.deletePersonalMemo = function(memoId) {
-            if (!currentRole) return;
-            const storageKey = `rpg_mdms_memo_${currentRole}`;
-            let existingMemos = JSON.parse(localStorage.getItem(storageKey) || "[]");
-            existingMemos = existingMemos.filter(memo => memo.id !== memoId);
-            localStorage.setItem(storageKey, JSON.stringify(existingMemos));
-            renderMemos();
-        };
-
-        function renderMemos() {
-            const container = document.getElementById("memo-list-container");
-            container.innerHTML = "";
-            if (!currentRole) return;
-
-            const storageKey = `rpg_mdms_memo_${currentRole}`;
-            const memos = JSON.parse(localStorage.getItem(storageKey) || "[]");
-
-            if (memos.length === 0) {
-                container.innerHTML = `<p class="text-gray-500 italic text-center py-2">メモはまだありません。容疑や推理を記録しましょう。</p>`;
-                return;
-            }
-// 666行目付近、scriptの末尾に追記
-        window.toggleModal = (show) => {
-            document.getElementById("personal-modal").classList.toggle("hidden", !show);
-            if(show) showTab('equip');
-        };
-
-        window.showTab = (tab) => {
-            const content = document.getElementById("modal-content");
-            if (tab === 'equip') {
-                content.innerHTML = `<h3 class="font-bold text-gray-400">装備リスト</h3><p class="text-gray-500">現在装備可能なアイテムはありません。</p>`;
-            } else if (tab === 'items') {
-                content.innerHTML = `<h3 class="font-bold text-gray-400">所持品一覧</h3><p class="text-gray-500">所持品はありません。</p>`;
-            } else {
-                content.innerHTML = `<h3 class="font-bold text-gray-400">個人メモ</h3><textarea class="w-full bg-gray-900 p-2 rounded h-32 border border-gray-700" placeholder="ここに個人的なメモを入力..."></textarea>`;
-            }
-        };
-            memos.forEach(memo => {
-                const item = document.createElement("div");
-                item.className = "bg-gray-900 border border-gray-750 p-2 rounded flex justify-between items-start gap-3 hover:border-gray-600 transition";
-                item.innerHTML = `
-                    <div class="flex-grow">
-                        <span class="text-[9px] bg-gray-800 text-gray-400 px-1 py-0.5 rounded mr-1.5 font-bold">${memo.stage}</span>
-                        <span class="text-gray-200 break-all select-text">${memo.content}</span>
-                    </div>
-                    <button onclick="deletePersonalMemo(${memo.id})" class="text-gray-500 hover:text-red-400 font-bold px-1 transition text-[11px]">✕</button>
-                `;
-                container.appendChild(item);
-            });
-            container.scrollTop = container.scrollHeight;
-        }
+        function pushActionLog(a, t) { push(ref(db, 'actionLogs'), { stage: localGameState.currentStage, phase: localGameState.currentPhase, actor: a, actionText: t }); }
+        function sendAnnouncement(t) { push(ref(db, 'announcements'), t); }
     </script>
 </body>
 </html>
