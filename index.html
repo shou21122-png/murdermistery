@@ -162,36 +162,6 @@
             
             <div id="active-role-announcement" class="text-sm font-bold text-indigo-300 bg-indigo-950/80 px-4 py-3 rounded-xl border border-indigo-800 flex justify-between items-center shadow-inner"></div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                
-                <section class="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow-sm flex flex-col">
-                    <h2 class="text-sm font-bold text-gray-400 mb-3 flex justify-between items-center">
-                        <span>🛡️ パーティ状況</span>
-                        <div id="ready-status-badges" class="flex gap-1 text-[10px]"></div>
-                    </h2>
-                    <div id="party-list-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-grow">
-                        </div>
-                </section>
-
-                <section class="flex flex-col gap-4">
-                    <div id="enemy-status-panel" class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-sm text-center relative overflow-hidden">
-                        <div id="crit-overlay" class="absolute inset-0 bg-red-600 opacity-0 pointer-events-none transition-opacity duration-200"></div>
-                        <h2 id="enemy-type-badge" class="text-xs font-bold text-red-400 uppercase tracking-wider mb-2">⚔️ エネミー</h2>
-                        <div class="text-3xl font-black text-red-500 my-2" id="boss-hp-display">--- / ---</div>
-                        <div class="w-full bg-gray-900 h-3 rounded-full overflow-hidden border border-gray-800">
-                            <div id="boss-hp-bar" class="bg-gradient-to-r from-red-600 to-orange-500 h-full transition-all" style="width: 100%"></div>
-                        </div>
-                        <p id="boss-status-text" class="text-[11px] text-gray-400 mt-3 italic">読み込み中...</p>
-                        <div id="rescue-buff-badge" class="mt-2 inline-block text-[10px] bg-amber-950 text-amber-400 border border-amber-900 px-2 py-0.5 rounded font-bold hidden">✨ 神の加護(攻撃力1.2倍)発動中！</div>
-                    </div>
-                    
-                    <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-sm flex-grow flex flex-col">
-                        <h2 class="text-[11px] font-bold text-gray-400 mb-2">🔔 バトルログ</h2>
-                        <div id="announcement-box" class="bg-gray-950 p-2 rounded border border-gray-900 text-[11px] space-y-1.5 h-32 overflow-y-auto custom-scroll font-mono text-gray-400"></div>
-                    </div>
-                </section>
-            </div>
-
             <section id="player-controls-panel" class="hidden">
                 <div id="battle-actions-section" class="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow-sm">
                     <h3 class="text-sm font-bold text-gray-300 mb-3">⚔️ あなたのアクション</h3>
@@ -394,6 +364,7 @@
         // ログ監視関連
         onValue(ref(db, 'announcements'), (snapshot) => {
             const box = document.getElementById("announcement-box");
+            if (!box) return;
             box.innerHTML = "";
             if (snapshot.exists()) {
                 const logs = Object.values(snapshot.val());
@@ -499,6 +470,7 @@
 
             // --- パーティ一覧のレンダリング (共有画面の左側) ---
             const partyContainer = document.getElementById("party-list-container");
+            if (!partyContainer) return;
             partyContainer.innerHTML = "";
             Object.entries(localGameState.players).forEach(([key, p]) => {
                 const isMe = key === currentRole;
