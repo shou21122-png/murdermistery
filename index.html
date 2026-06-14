@@ -5,11 +5,148 @@
     <meta charset="UTF-8">
     <title>RPG×マダミス 共有UI版</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;900&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --stone-dark: #3a2f24;
+            --stone-mid: #8a7a5e;
+            --stone-light: #c4b59a;
+            --stone-panel: #f6efdd;
+            --metal-gold: #b8860b;
+            --metal-gold-bright: #8a6212;
+            --metal-silver: #9a9a9a;
+            --ember: #b6452f;
+            --ember-bright: #9c3a26;
+            --parchment: #3a2f1f;
+            --parchment-dim: #6b5c47;
+            --well: #e8dcc4;
+        }
+
+        body {
+            font-family: 'EB Garamond', serif;
+            color: var(--parchment);
+            background-color: #e8dcc4;
+            background-image:
+                radial-gradient(circle at 20% 20%, rgba(184,134,11,0.06) 0%, transparent 35%),
+                radial-gradient(circle at 80% 70%, rgba(182,69,47,0.05) 0%, transparent 35%),
+                repeating-linear-gradient(0deg, rgba(0,0,0,0.04) 0px, rgba(0,0,0,0.04) 1px, transparent 1px, transparent 42px),
+                repeating-linear-gradient(90deg, rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 1px, transparent 1px, transparent 64px);
+        }
+
+        .font-display { font-family: 'Cinzel', serif; letter-spacing: 0.04em; }
+
+        /* 見出し用：両端に菱形飾り */
+        .rune-heading {
+            font-family: 'Cinzel', serif;
+            letter-spacing: 0.08em;
+            display: flex;
+            align-items: center;
+            gap: 0.6em;
+            color: var(--metal-gold-bright);
+            text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+        }
+        .rune-heading::before, .rune-heading::after {
+            content: "";
+            flex: 0 0 7px;
+            width: 7px; height: 7px;
+            background: var(--metal-gold);
+            transform: rotate(45deg);
+            box-shadow: 0 0 4px rgba(184,134,11,0.6);
+            flex-shrink: 0;
+        }
+        .rune-heading.rune-left::after { display: none; }
+        .rune-heading.rune-left { justify-content: flex-start; }
+
+        /* 石造りパネル＋金属枠＋コーナーピース */
+        .stone-panel {
+            position: relative;
+            background-color: var(--stone-panel);
+            background-image:
+                radial-gradient(circle at 30% 20%, rgba(255,255,255,0.4) 0%, transparent 40%),
+                linear-gradient(135deg, rgba(0,0,0,0.04) 0%, transparent 50%);
+            border: 1px solid var(--stone-light);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5), inset 0 2px 6px rgba(0,0,0,0.06), 0 2px 6px rgba(58,47,36,0.15);
+        }
+        .stone-corners::before, .stone-corners::after {
+            content: "";
+            position: absolute;
+            width: 14px; height: 14px;
+            border: 2px solid var(--metal-gold);
+            pointer-events: none;
+            opacity: 0.85;
+        }
+        .stone-corners::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+        .stone-corners::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+        /* 中世風ボタン（金属プレート） */
+        .iron-btn {
+            font-family: 'Cinzel', serif;
+            letter-spacing: 0.05em;
+            background: linear-gradient(180deg, #5a5a5a 0%, #3a3a3a 45%, #2a2a2a 100%);
+            border: 1px solid #1a1a1a;
+            border-top-color: #6e6e6e;
+            color: #f0e8d8;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -2px 4px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.3);
+            transition: filter 0.15s, transform 0.05s;
+        }
+        .iron-btn:hover { filter: brightness(1.18); }
+        .iron-btn:active { transform: translateY(1px); }
+        .iron-btn:disabled { filter: grayscale(0.6) brightness(0.6); cursor: not-allowed; }
+
+        .iron-btn-gold {
+            background: linear-gradient(180deg, #d4a843 0%, #a8791f 45%, #7a5613 100%);
+            border: 1px solid #4a3408;
+            border-top-color: #f0cb7a;
+            color: #2a1c05;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -2px 4px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.4);
+        }
+        .iron-btn-gold:hover { filter: brightness(1.12); }
+
+        .iron-btn-crimson {
+            background: linear-gradient(180deg, #b54530 0%, #7a2515 45%, #5a1a0d 100%);
+            border: 1px solid #2e0c05;
+            border-top-color: #d9745a;
+            color: #f0e8d8;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), inset 0 -2px 4px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.4);
+        }
+        .iron-btn-crimson:hover { filter: brightness(1.15); }
+
+        .iron-btn-emerald {
+            background: linear-gradient(180deg, #4f7a4a 0%, #2f4f2c 45%, #21381f 100%);
+            border: 1px solid #142211;
+            border-top-color: #7aa874;
+            color: #f0e8d8;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), inset 0 -2px 4px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.4);
+        }
+        .iron-btn-emerald:hover { filter: brightness(1.15); }
+
+        .iron-btn-indigo {
+            background: linear-gradient(180deg, #5a5380 0%, #3a3458 45%, #28233e 100%);
+            border: 1px solid #15131f;
+            border-top-color: #8b84b8;
+            color: #f0e8d8;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), inset 0 -2px 4px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.4);
+        }
+        .iron-btn-indigo:hover { filter: brightness(1.15); }
+
+        /* ゲージ（HP/SP/敵HP）：革ベルト＋金属バックル風 */
+        .gauge-track {
+            background: linear-gradient(180deg, #1c1410 0%, #0e0a08 100%);
+            border: 1px solid var(--stone-light);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.7);
+        }
+        .gauge-fill-hp { background: linear-gradient(180deg, #8a3a2a 0%, #6e2a1c 60%, #4a1c12 100%); }
+        .gauge-fill-sp { background: linear-gradient(180deg, #3a5a7a 0%, #2a4258 60%, #1c2e3e 100%); }
+        .gauge-fill-enemy { background: linear-gradient(180deg, #a83a2a 0%, #7a1f12 60%, #4a0f08 100%); }
+        .gauge-fill-gold { background: linear-gradient(180deg, var(--metal-gold-bright) 0%, var(--metal-gold) 60%, #7a5613 100%); }
+
+        /* スクロールバー(中世風) */
         .custom-scroll::-webkit-scrollbar { width: 6px; }
-        .custom-scroll::-webkit-scrollbar-track { background: #1f2937; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
-        
+        .custom-scroll::-webkit-scrollbar-track { background: var(--stone-dark); }
+        .custom-scroll::-webkit-scrollbar-thumb { background: var(--metal-gold); border-radius: 0; }
+
         @keyframes flash-red {
             0%, 100% { opacity: 0; }
             50% { opacity: 0.4; }
@@ -22,316 +159,413 @@
                 linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
             transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
         }
+        @keyframes fire-flicker {
+            0%, 100% { transform: scaleY(1) scaleX(1); opacity: 1; }
+            25% { transform: scaleY(1.08) scaleX(0.95) translateY(-2px); opacity: 0.95; }
+            50% { transform: scaleY(0.95) scaleX(1.05); opacity: 1; }
+            75% { transform: scaleY(1.05) scaleX(0.97) translateY(-1px); opacity: 0.9; }
+        }
+        .fire-flicker { animation: fire-flicker 0.6s ease-in-out infinite; transform-origin: bottom center; }
+        .fire-flicker-2 { animation: fire-flicker 0.45s ease-in-out infinite reverse; transform-origin: bottom center; }
+
+        /* 攻撃エフェクト：斬撃線 */
+        @keyframes slash-effect {
+            0% { opacity: 0; transform: translate(60px, -60px) scale(0.6) rotate(-35deg); }
+            15% { opacity: 1; transform: translate(0, 0) scale(1.05) rotate(-35deg); }
+            40% { opacity: 1; transform: translate(-10px, 10px) scale(1) rotate(-35deg); }
+            100% { opacity: 0; transform: translate(-30px, 30px) scale(1) rotate(-35deg); }
+        }
+        .effect-slash {
+            position: absolute;
+            width: 380px; height: 8px;
+            background: linear-gradient(90deg, transparent 0%, #f6efdd 15%, #ffffff 50%, #f6efdd 85%, transparent 100%);
+            box-shadow: 0 0 12px 2px rgba(255,255,255,0.8);
+            animation: slash-effect 0.5s ease-out forwards;
+        }
+        .effect-slash.slash-2 { animation-delay: 0.12s; top: 55%; }
+        .effect-slash.slash-1 { top: 45%; }
+
+        /* 必殺技/会心エフェクト：複数斬撃 */
+        @keyframes slash-effect-big {
+            0% { opacity: 0; transform: translate(80px, -80px) scale(0.5) rotate(-35deg); }
+            12% { opacity: 1; transform: translate(0, 0) scale(1.2) rotate(-35deg); }
+            45% { opacity: 1; transform: translate(-15px, 15px) scale(1.15) rotate(-35deg); }
+            100% { opacity: 0; transform: translate(-40px, 40px) scale(1.15) rotate(-35deg); }
+        }
+        .effect-slash-big {
+            position: absolute;
+            width: 480px; height: 12px;
+            background: linear-gradient(90deg, transparent 0%, var(--metal-gold-bright) 10%, #ffffff 50%, var(--metal-gold-bright) 90%, transparent 100%);
+            box-shadow: 0 0 20px 4px rgba(224,177,92,0.9);
+            animation: slash-effect-big 0.7s ease-out forwards;
+        }
+
+        /* 魔法陣エフェクト：スキル・回復・バフ */
+        @keyframes magic-circle-effect {
+            0% { opacity: 0; transform: scale(0.3) rotate(0deg); }
+            30% { opacity: 1; transform: scale(1.1) rotate(120deg); }
+            70% { opacity: 1; transform: scale(1) rotate(280deg); }
+            100% { opacity: 0; transform: scale(1.2) rotate(360deg); }
+        }
+        .effect-magic-circle {
+            position: absolute;
+            width: 320px; height: 320px;
+            animation: magic-circle-effect 1s ease-out forwards;
+        }
+        @keyframes magic-pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        .effect-magic-circle circle, .effect-magic-circle path {
+            animation: magic-pulse 0.5s ease-in-out infinite;
+        }
+
+        /* ボス登場エフェクト */
+        @keyframes boss-flash {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        .effect-boss-flash {
+            position: absolute; inset: 0;
+            background: radial-gradient(circle, #ffffff 0%, var(--ember) 60%, transparent 100%);
+            animation: boss-flash 0.6s ease-out forwards;
+        }
+        @keyframes boss-banner {
+            0% { opacity: 0; transform: scale(2) translateY(-20px); letter-spacing: 0.6em; }
+            25% { opacity: 1; transform: scale(1) translateY(0); letter-spacing: 0.3em; }
+            80% { opacity: 1; transform: scale(1) translateY(0); }
+            100% { opacity: 0; transform: scale(1.1) translateY(-10px); }
+        }
+        .effect-boss-banner {
+            position: absolute; top: 38%; left: 0; right: 0;
+            text-align: center;
+            font-family: 'Cinzel', serif;
+            font-size: 2.2rem; font-weight: 900;
+            color: var(--ember-bright);
+            text-shadow: 0 0 14px rgba(255,255,255,0.8), 0 2px 4px rgba(0,0,0,0.4);
+            animation: boss-banner 1.8s ease-out forwards;
+        }
+        @keyframes boss-ray {
+            0% { opacity: 0; transform: rotate(var(--r, 0deg)) scaleX(0); }
+            30% { opacity: 0.8; transform: rotate(var(--r, 0deg)) scaleX(1); }
+            100% { opacity: 0; transform: rotate(var(--r, 0deg)) scaleX(1.2); }
+        }
+        .effect-boss-ray {
+            position: absolute; top: 50%; left: 50%;
+            width: 600px; height: 3px;
+            background: linear-gradient(90deg, var(--ember-bright) 0%, transparent 100%);
+            transform-origin: left center;
+            animation: boss-ray 1s ease-out forwards;
+        }
+
+        /* 祝勝エフェクト */
+        @keyframes victory-banner {
+            0% { opacity: 0; transform: scale(0.6) translateY(20px); }
+            20% { opacity: 1; transform: scale(1.1) translateY(0); }
+            35% { transform: scale(1) translateY(0); }
+            85% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(-15px); }
+        }
+        .effect-victory-banner {
+            position: absolute; top: 36%; left: 0; right: 0;
+            text-align: center;
+            font-family: 'Cinzel', serif;
+            font-size: 2.4rem; font-weight: 900;
+            color: var(--metal-gold-bright);
+            text-shadow: 0 0 16px rgba(255,255,255,0.9), 0 2px 4px rgba(0,0,0,0.3);
+            animation: victory-banner 2.4s ease-out forwards;
+            z-index: 2;
+            display: flex; flex-direction: column; align-items: center; gap: 0.4em;
+        }
+        .effect-victory-gold {
+            font-size: 1.2rem;
+            color: #f6efdd;
+            text-shadow: 0 0 10px rgba(184,134,11,0.8), 0 2px 4px rgba(0,0,0,0.4);
+        }
+        @keyframes confetti-fall {
+            0% { opacity: 1; transform: translateY(-20px) rotate(0deg); }
+            100% { opacity: 0; transform: translateY(420px) rotate(var(--rot, 360deg)); }
+        }
+        .effect-confetti {
+            position: absolute; top: 0;
+            width: 10px; height: 14px;
+            animation: confetti-fall linear forwards;
+        }
+        @keyframes gold-coin-fall {
+            0% { opacity: 0; transform: translateY(-30px) scale(0.6); }
+            15% { opacity: 1; transform: translateY(0) scale(1); }
+            80% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(380px) scale(0.9); }
+        }
+        .effect-gold-coin {
+            position: absolute; top: 0;
+            font-size: 1.8rem;
+            animation: gold-coin-fall 2s ease-in forwards;
+        }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen font-sans antialiased pb-12">
+<body class="min-h-screen font-serif antialiased pb-12">
 
-    <header class="bg-gray-800 border-b border-gray-700 p-4 sticky top-0 z-50 shadow-md">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+    <header class="border-b-2 p-4 sticky top-0 z-50 shadow-lg" style="background: linear-gradient(180deg, var(--stone-mid), var(--stone-dark)); border-color: var(--metal-gold);">
+        <div class="max-w-[1920px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-4">
-                <button onclick="toggleModal(true)" id="btn-menu" class="hidden bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-bold transition shadow-md">
-                    ⚙️ メニュー
+                <button onclick="toggleModal(true)" id="btn-menu" class="hidden iron-btn-gold px-4 py-2 text-sm font-bold">
+                    ⚙ メニュー
                 </button>
                 <div>
-                    <h1 class="text-xl font-bold text-indigo-400 flex items-center gap-2">
-                        ⚔️ RPG × マダミス <span class="text-xs bg-indigo-900 text-indigo-300 px-2 py-0.5 rounded border border-indigo-700">Ver7.0 共有UI</span>
+                    <h1 class="text-xl font-display font-bold flex items-center gap-2" style="color: var(--metal-gold-bright);">
+                        RPG × マダミス <span class="text-xs px-2 py-0.5 border" style="background: var(--stone-panel); color: var(--parchment-dim); border-color: var(--stone-light);">Ver7.0 共有UI</span>
                     </h1>
                 </div>
             </div>
             
             <div class="flex flex-col items-end gap-2">
-                <div id="turn-order-container" class="hidden bg-gray-950 px-3 py-1.5 rounded-lg border border-gray-700 text-[11px] font-bold flex items-center gap-2">
-                    <span class="text-amber-400">⚡ 行動順:</span>
-                    <div id="turn-order-display" class="flex items-center gap-1.5"></div>
-                </div>
-                <div class="flex items-center gap-3 bg-gray-900 px-4 py-1.5 rounded-lg border border-gray-700">
+                <div class="flex items-center gap-3 px-4 py-1.5 stone-panel">
                     <div class="flex items-center gap-2">
-                        <span id="current-stage-display" class="text-sm font-bold text-yellow-400">読込中...</span>
-                        <span id="current-phase-display" class="text-xs bg-indigo-950 text-indigo-300 border border-indigo-800 px-2 py-0.5 rounded font-bold">---</span>
+                        <span id="current-stage-display" class="text-sm font-display font-bold" style="color: var(--metal-gold-bright);">読込中...</span>
+                        <span id="current-phase-display" class="text-xs px-2 py-0.5 font-bold border" style="background: var(--well); color: var(--parchment-dim); border-color: var(--stone-light);">---</span>
                     </div>
                 </div>
             </div>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto p-4 flex flex-col gap-6 mt-2">
+    <main class="max-w-[1920px] mx-auto p-4 flex flex-col gap-6 mt-2">
        <div id="app" class="flex flex-col gap-4">
-            
-            <div class="flex flex-col lg:flex-row justify-between items-start gap-4 w-full">
-                
-                <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 flex-grow w-full lg:w-auto">
-                    <div class="flex items-center gap-4 bg-gray-800 p-3 rounded-xl border-2 border-gray-600 shadow-md">
-                        <div class="w-14 h-14 bg-blue-500 rounded-full border-2 border-gray-300 shadow-inner flex-shrink-0"></div>
-                        <div class="flex-1">
-                            <div class="text-sm font-bold text-gray-200">PL1: 剣士</div>
-                            <div class="flex justify-between text-xs mt-1 mb-0.5">
-                                <span class="text-green-400 font-mono font-bold">HP</span>
-                                <span class="text-green-400 font-mono">100 / 100</span>
-                            </div>
-                            <div class="w-full bg-gray-900 h-2 rounded-full mb-1"><div class="bg-green-500 h-full w-full rounded-full"></div></div>
-                            <div class="flex justify-between text-xs mb-0.5">
-                                <span class="text-blue-400 font-mono font-bold">SP</span>
-                                <span class="text-blue-400 font-mono">50 / 100</span>
-                            </div>
-                            <div class="w-full bg-gray-900 h-2 rounded-full"><div class="bg-blue-500 h-full w-1/2 rounded-full"></div></div>
-                        </div>
-                    </div>
 
-                    <div class="flex items-center gap-4 bg-gray-800 p-3 rounded-xl border-2 border-gray-600 shadow-md">
-                        <div class="w-14 h-14 bg-green-500 rounded-full border-2 border-gray-300 shadow-inner flex-shrink-0"></div>
-                        <div class="flex-1">
-                            <div class="text-sm font-bold text-gray-200">PL2: 探偵</div>
-                            <div class="flex justify-between text-xs mt-1 mb-0.5">
-                                <span class="text-green-400 font-mono font-bold">HP</span>
-                                <span class="text-green-400 font-mono">80 / 100</span>
-                            </div>
-                            <div class="w-full bg-gray-900 h-2 rounded-full mb-1"><div class="bg-green-500 h-full w-4/5 rounded-full"></div></div>
-                            <div class="flex justify-between text-xs mb-0.5">
-                                <span class="text-blue-400 font-mono font-bold">SP</span>
-                                <span class="text-blue-400 font-mono">70 / 100</span>
-                            </div>
-                            <div class="w-full bg-gray-900 h-2 rounded-full"><div class="bg-blue-500 h-full w-[70%] rounded-full"></div></div>
-                        </div>
-                    </div>
+            <div class="flex flex-col lg:flex-row gap-4 w-full h-auto lg:h-[700px]">
 
-                    <div class="flex items-center gap-4 bg-gray-800 p-3 rounded-xl border-2 border-gray-600 shadow-md">
-                        <div class="w-14 h-14 bg-yellow-500 rounded-full border-2 border-gray-300 shadow-inner flex-shrink-0"></div>
-                        <div class="flex-1">
-                            <div class="text-sm font-bold text-gray-200">PL3: 医師</div>
-                            <div class="flex justify-between text-xs mt-1 mb-0.5">
-                                <span class="text-green-400 font-mono font-bold">HP</span>
-                                <span class="text-green-400 font-mono">90 / 100</span>
-                            </div>
-                            <div class="w-full bg-gray-900 h-2 rounded-full mb-1"><div class="bg-green-500 h-full w-[90%] rounded-full"></div></div>
-                            <div class="flex justify-between text-xs mb-0.5">
-                                <span class="text-blue-400 font-mono font-bold">SP</span>
-                                <span class="text-blue-400 font-mono">80 / 100</span>
-                            </div>
-                            <div class="w-full bg-gray-900 h-2 rounded-full"><div class="bg-blue-500 h-full w-[80%] rounded-full"></div></div>
-                        </div>
-                    </div>
+                <div id="party-list-container" class="w-full lg:w-56 flex-shrink-0 grid grid-cols-2 lg:grid-cols-1 gap-3 lg:overflow-y-auto custom-scroll lg:h-full pr-1"></div>
+                <span id="rescue-buff-badge" class="hidden"></span>
+                <div id="ready-status-badges" class="hidden flex gap-1 flex-wrap"></div>
 
-                    <div class="flex items-center gap-4 bg-gray-800 p-3 rounded-xl border-2 border-gray-600 shadow-md">
-                        <div class="w-14 h-14 bg-purple-500 rounded-full border-2 border-gray-300 shadow-inner flex-shrink-0"></div>
-                        <div class="flex-1">
-                            <div class="text-sm font-bold text-gray-200">PL4: 魔術師</div>
-                            <div class="flex justify-between text-xs mt-1 mb-0.5">
-                                <span class="text-green-400 font-mono font-bold">HP</span>
-                                <span class="text-green-400 font-mono">70 / 100</span>
-                            </div>
-                            <div class="w-full bg-gray-900 h-2 rounded-full mb-1"><div class="bg-green-500 h-full w-[70%] rounded-full"></div></div>
-                            <div class="flex justify-between text-xs mb-0.5">
-                                <span class="text-blue-400 font-mono font-bold">SP</span>
-                                <span class="text-blue-400 font-mono">100 / 100</span>
-                            </div>
-                            <div class="w-full bg-gray-900 h-2 rounded-full"><div class="bg-blue-500 h-full w-full rounded-full"></div></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="w-full lg:w-80 flex-shrink-0">
-                    <div class="bg-gray-800 p-4 rounded-xl border-2 border-red-900 text-center flex flex-col items-center shadow-[0_0_15px_rgba(220,38,38,0.2)] h-full justify-center">
-                        <div class="text-base font-bold text-red-400 mb-2">BOSS: 怨念の亡霊</div>
-                        <div class="w-full bg-gray-900 h-5 rounded-full overflow-hidden border border-gray-700 relative">
-                            <div class="bg-gradient-to-r from-red-700 to-red-500 h-full w-[85%]"></div>
-                            <span class="absolute inset-0 flex items-center justify-center text-xs font-bold text-white drop-shadow-md">HP 8500 / 10000</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex flex-col lg:flex-row gap-4 w-full h-[700px]"> <div class="relative flex-grow bg-slate-900 rounded-xl overflow-hidden shadow-2xl border border-gray-700 h-full">
+                <div class="flex flex-col lg:flex-row gap-4 flex-grow h-[400px] lg:h-full">
+                    <div class="relative flex-grow stone-corners overflow-hidden shadow-2xl border-2 h-full" style="border-color: var(--metal-gold); background: var(--stone-dark);">
                     
                     <div class="absolute inset-0 flex items-center justify-center overflow-hidden">
-                        <div class="absolute inset-0 bg-gradient-to-b from-gray-800 to-indigo-900"></div>
+                        <div class="absolute inset-0" style="background: linear-gradient(180deg, #2b2420 0%, #161310 100%);"></div>
+
                         <div class="absolute inset-0 w-full h-[200%] bg-grid z-0"></div>
-                        <span class="text-gray-500 font-bold tracking-widest z-0 text-xl">[ 3D空間 描画領域 ]</span>
+                        <span class="font-display z-0 text-xl" style="color: var(--stone-light); letter-spacing: 0.15em;">[ 3D空間 描画領域 ]</span>
                     </div>
 
+                    <div id="battle-display-group">
                     <div class="absolute left-0 bottom-0 w-1/2 h-full pointer-events-none">
-                        <div class="absolute bottom-[28%] left-[42%] w-40 h-80 bg-blue-900/60 border border-blue-500 rounded-t-full flex items-center justify-center text-blue-200 text-sm font-bold shadow-[0_0_20px_rgba(59,130,246,0.3)] backdrop-blur-sm z-10 scale-[0.65] opacity-60">
+                        <div class="absolute bottom-[28%] left-[42%] w-40 h-80 border flex items-center justify-center font-display text-sm font-bold z-10 scale-[0.65] opacity-60" style="background: rgba(74,63,53,0.5); border-color: var(--stone-light); color: var(--parchment-dim); border-radius: 9999px 9999px 0 0;">
                             PL1 立ち絵
                         </div>
-                        <div class="absolute bottom-[20%] left-[28%] w-40 h-80 bg-green-900/70 border border-green-500 rounded-t-full flex items-center justify-center text-green-200 text-base font-bold shadow-[0_0_20px_rgba(34,197,94,0.3)] backdrop-blur-sm z-[11] scale-[0.78] opacity-80">
+                        <div class="absolute bottom-[20%] left-[28%] w-40 h-80 border flex items-center justify-center font-display text-base font-bold z-[11] scale-[0.78] opacity-80" style="background: rgba(74,63,53,0.6); border-color: var(--metal-silver); color: var(--parchment-dim); border-radius: 9999px 9999px 0 0;">
                             PL2 立ち絵
                         </div>
-                        <div class="absolute bottom-[10%] left-[14%] w-40 h-80 bg-yellow-900/80 border border-yellow-500 rounded-t-full flex items-center justify-center text-yellow-200 text-base font-bold shadow-[0_0_20px_rgba(234,179,8,0.3)] backdrop-blur-sm z-[12] scale-[0.9] opacity-95">
+                        <div class="absolute bottom-[10%] left-[14%] w-40 h-80 border flex items-center justify-center font-display text-base font-bold z-[12] scale-[0.9] opacity-95" style="background: rgba(74,63,53,0.7); border-color: var(--metal-gold); color: #f0e8d8; border-radius: 9999px 9999px 0 0;">
                             PL3 立ち絵
                         </div>
-                        <div class="absolute bottom-[2%] left-[2%] w-40 h-80 bg-purple-900 border-2 border-purple-400 rounded-t-full flex items-center justify-center text-purple-200 text-base font-bold shadow-[0_0_30px_rgba(168,85,247,0.5)] z-[13] scale-100">
+                        <div class="absolute bottom-[2%] left-[2%] w-40 h-80 border-2 flex items-center justify-center font-display text-base font-bold z-[13] scale-100" style="background: var(--stone-panel); border-color: var(--metal-gold-bright); color: var(--parchment); border-radius: 9999px 9999px 0 0; box-shadow: 0 0 30px rgba(184,134,11,0.4);">
                             PL4 立ち絵
                         </div>
                     </div>
 
                     <div class="absolute right-[12%] bottom-[12%] pointer-events-none z-20">
-                        <div class="w-80 h-[480px] bg-red-950/80 border-2 border-red-600 rounded-t-full flex flex-col items-center justify-center text-red-300 font-bold shadow-[0_0_50px_rgba(220,38,38,0.4)] backdrop-blur-sm animate-pulse">
+                        <div class="w-80 h-[480px] border-2 flex flex-col items-center justify-center font-display font-bold animate-pulse" style="background: rgba(74,31,15,0.7); border-color: var(--ember); color: var(--ember-bright); border-radius: 9999px 9999px 0 0; box-shadow: 0 0 50px rgba(194,65,12,0.4);">
                             <span class="text-4xl mb-2">👻</span>
                             <span class="text-xl">ENEMY 立ち絵</span>
                         </div>
                     </div>
-                </div>
 
-                <div class="w-full lg:w-48 bg-gray-800 rounded-xl border-2 border-gray-600 p-3 flex flex-col shadow-md h-full flex-shrink-0">
-                    <h3 class="text-sm font-bold text-gray-300 mb-3 text-center border-b border-gray-600 pb-2">⏱ 行動順</h3>
-                    
-                    <div class="flex flex-col gap-2 flex-grow overflow-y-auto custom-scroll pr-1">
-                        <div class="flex items-center gap-2 bg-gray-900 p-2 rounded border border-gray-500 shadow-sm relative overflow-hidden">
-                            <div class="absolute left-0 top-0 bottom-0 w-1 bg-green-500"></div>
-                            <span class="text-xs font-bold text-gray-500 w-3 text-center">1</span>
-                            <div class="w-6 h-6 bg-green-500 rounded-full border border-gray-300"></div>
-                            <span class="text-xs text-gray-200 font-bold truncate">PL2: 探偵</span>
-                        </div>
+                    <div id="effect-overlay" class="absolute inset-0 pointer-events-none z-40 flex items-center justify-center overflow-hidden"></div>
+                    </div>
 
-                        <div class="flex items-center gap-2 bg-gray-900 p-2 rounded border border-red-900 shadow-sm relative overflow-hidden">
-                            <div class="absolute left-0 top-0 bottom-0 w-1 bg-red-600"></div>
-                            <span class="text-xs font-bold text-gray-500 w-3 text-center">2</span>
-                            <div class="w-6 h-6 bg-red-800 rounded-full border border-red-500 flex items-center justify-center text-[10px]">👻</div>
-                            <span class="text-xs text-red-300 font-bold truncate">BOSS</span>
-                        </div>
+                    <div id="rest-display-group" class="hidden absolute inset-0 pointer-events-none">
+                        <svg viewBox="0 0 800 500" class="w-full h-full" preserveAspectRatio="xMidYMax slice">
+                            <defs>
+                                <radialGradient id="fireGlow" cx="50%" cy="60%" r="60%">
+                                    <stop offset="0%" stop-color="#fde047" stop-opacity="0.55"/>
+                                    <stop offset="40%" stop-color="#f97316" stop-opacity="0.25"/>
+                                    <stop offset="100%" stop-color="#f97316" stop-opacity="0"/>
+                                </radialGradient>
+                                <radialGradient id="logGrad" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" stop-color="#92400e"/>
+                                    <stop offset="100%" stop-color="#451a03"/>
+                                </radialGradient>
+                            </defs>
 
-                        <div class="flex items-center gap-2 bg-gray-900 p-2 rounded border border-gray-700 shadow-sm relative overflow-hidden">
-                            <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
-                            <span class="text-xs font-bold text-gray-500 w-3 text-center">3</span>
-                            <div class="w-6 h-6 bg-blue-500 rounded-full border border-gray-300"></div>
-                            <span class="text-xs text-gray-200 font-bold truncate">PL1: 剣士</span>
-                        </div>
+                            <ellipse cx="400" cy="430" rx="380" ry="60" fill="#1e293b"/>
+                            <ellipse cx="400" cy="380" rx="320" ry="200" fill="url(#fireGlow)"/>
 
-                        <div class="flex items-center gap-2 bg-gray-900 p-2 rounded border border-gray-700 shadow-sm relative overflow-hidden">
-                            <div class="absolute left-0 top-0 bottom-0 w-1 bg-purple-500"></div>
-                            <span class="text-xs font-bold text-gray-500 w-3 text-center">4</span>
-                            <div class="w-6 h-6 bg-purple-500 rounded-full border border-gray-300"></div>
-                            <span class="text-xs text-gray-200 font-bold truncate">PL4: 魔術師</span>
-                        </div>
+                            <g transform="translate(400,400)">
+                                <ellipse cx="0" cy="20" rx="70" ry="14" fill="#0f172a"/>
+                                <rect x="-55" y="-2" width="110" height="14" rx="6" fill="url(#logGrad)" transform="rotate(8)"/>
+                                <rect x="-55" y="-2" width="110" height="14" rx="6" fill="url(#logGrad)" transform="rotate(-12)"/>
+                                <rect x="-50" y="-2" width="100" height="12" rx="6" fill="url(#logGrad)" transform="rotate(45)"/>
 
-                        <div class="flex items-center gap-2 bg-gray-900 p-2 rounded border border-gray-700 shadow-sm relative overflow-hidden">
-                            <div class="absolute left-0 top-0 bottom-0 w-1 bg-yellow-500"></div>
-                            <span class="text-xs font-bold text-gray-500 w-3 text-center">5</span>
-                            <div class="w-6 h-6 bg-yellow-500 rounded-full border border-gray-300"></div>
-                            <span class="text-xs text-gray-200 font-bold truncate">PL3: 医師</span>
-                        </div>
+                                <g class="fire-flicker">
+                                    <path d="M0,10 C-22,-10 -16,-45 0,-70 C16,-45 22,-10 0,10 Z" fill="#ea580c"/>
+                                    <path d="M0,5 C-13,-12 -10,-38 0,-55 C10,-38 13,-12 0,5 Z" fill="#f97316"/>
+                                    <path d="M0,0 C-7,-10 -5,-28 0,-40 C5,-28 7,-10 0,0 Z" fill="#fde047"/>
+                                </g>
+                                <g class="fire-flicker-2">
+                                    <path d="M-18,8 C-26,-4 -22,-22 -14,-32 C-8,-20 -10,-4 -18,8 Z" fill="#f97316" opacity="0.85"/>
+                                    <path d="M18,8 C26,-4 22,-22 14,-32 C8,-20 10,-4 18,8 Z" fill="#ea580c" opacity="0.85"/>
+                                </g>
+                            </g>
+
+                            <g id="rest-figures" font-size="46" text-anchor="middle">
+                                <text x="180" y="350">🧍</text>
+                                <text x="290" y="400">🧍</text>
+                                <text x="520" y="400">🧍</text>
+                                <text x="630" y="350">🧍</text>
+                            </g>
+                        </svg>
+                        <div class="absolute bottom-4 w-full text-center text-sm font-display font-bold tracking-widest" style="color: var(--metal-gold-bright);">焚火を囲んで休息中...</div>
+                    </div>
+
+                    <div class="hidden absolute top-3 right-3 z-30 stone-panel px-3 py-2 flex items-center gap-2 max-w-[90%] overflow-x-auto custom-scroll">
+                        <h3 class="text-xs font-display font-bold flex-shrink-0 border-r pr-2" style="color: var(--metal-gold-bright); border-color: var(--stone-light);">行動順</h3>
+                        <div id="turn-order-panel-display" class="flex items-center gap-2"></div>
                     </div>
                 </div>
+
+                <div id="enemy-status-panel" class="w-full lg:w-56 flex-shrink-0 stone-corners p-4 flex flex-col gap-2 shadow-lg h-full border-2" style="border-color: var(--ember); background: var(--stone-panel);">
+                    <div class="flex items-center justify-between">
+                        <span id="enemy-type-badge" class="text-[10px] px-2 py-0.5 font-bold border" style="background: var(--well); color: var(--ember-bright); border-color: var(--ember);">👾 襲撃モブ</span>
+                    </div>
+                    <div class="text-base font-display font-bold" style="color: var(--ember-bright);" id="enemy-name-display">---</div>
+                    <div class="w-full h-5 overflow-hidden relative gauge-track">
+                        <div id="boss-hp-bar" class="gauge-fill-enemy h-full" style="width: 0%"></div>
+                        <span id="boss-hp-display" class="absolute inset-0 flex items-center justify-center text-xs font-display font-bold text-white drop-shadow-md">- / -</span>
+                    </div>
+                    <p id="boss-status-text" class="text-[11px] leading-relaxed mt-1" style="color: var(--parchment-dim);"></p>
+                </div>
+
+                <div id="rest-shop-panel" class="hidden w-full lg:w-56 flex-shrink-0 stone-corners p-4 flex flex-col gap-3 shadow-lg lg:h-full lg:overflow-y-auto custom-scroll border-2" style="border-color: var(--metal-gold); background: var(--stone-panel);">
+                    <h4 class="rune-heading rune-left text-xs font-display font-bold">闇の放浪商人</h4>
+                    <div id="shop-item-grid" class="grid grid-cols-1 gap-3"></div>
+                </div>
+
+            </div>
 
             </div>
 
         </div>
-        <section id="role-select-panel" class="bg-gradient-to-br from-gray-800 to-gray-850 p-6 rounded-xl border-2 border-dashed border-indigo-500 shadow-xl max-w-4xl mx-auto w-full">
-            <h2 class="text-base font-black text-indigo-400 uppercase tracking-wider mb-2 text-center">🎭 担当するキャラクターを選択</h2>
-            <p class="text-xs text-center text-gray-400 mb-5">一度選ぶと、GMがリセットするまで変更できません。</p>
+        <section id="role-select-panel" class="stone-corners p-6 border-2 border-dashed max-w-4xl mx-auto w-full" style="border-color: var(--metal-gold); background: var(--stone-panel);">
+            <h2 class="rune-heading justify-center text-base font-display font-bold uppercase mb-2">担当するキャラクターを選択</h2>
+            <p class="text-xs text-center mb-5" style="color: var(--parchment-dim);">一度選ぶと、GMがリセットするまで変更できません。</p>
             <div class="grid grid-cols-1 sm:grid-cols-5 gap-3" id="role-select-container">
-                <button onclick="lockAndSelectRole('gm')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">👑 GM(主催者)</button>
-                <button onclick="lockAndSelectRole('ninja')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">🥷 忍</button>
-                <button onclick="lockAndSelectRole('demon')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">😈 悪魔</button>
-                <button onclick="lockAndSelectRole('priest_bro')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">👦 神官兄</button>
-                <button onclick="lockAndSelectRole('priest_sis')" class="p-4 bg-gray-700 hover:bg-gray-600 rounded-xl text-xs font-bold transition border border-gray-600 shadow-md">👧 神官妹</button>
+                <button onclick="lockAndSelectRole('gm')" class="p-4 iron-btn text-xs font-display font-bold">👑 GM(主催者)</button>
+                <button onclick="lockAndSelectRole('ninja')" class="p-4 iron-btn text-xs font-display font-bold">🥷 忍</button>
+                <button onclick="lockAndSelectRole('demon')" class="p-4 iron-btn text-xs font-display font-bold">😈 悪魔</button>
+                <button onclick="lockAndSelectRole('priest_bro')" class="p-4 iron-btn text-xs font-display font-bold">👦 神官兄</button>
+                <button onclick="lockAndSelectRole('priest_sis')" class="p-4 iron-btn text-xs font-display font-bold">👧 神官妹</button>
             </div>
         </section>
 
         <div id="shared-main-view" class="hidden flex flex-col gap-6">
-            
-            <div id="active-role-announcement" class="text-sm font-bold text-indigo-300 bg-indigo-950/80 px-4 py-3 rounded-xl border border-indigo-800 flex justify-between items-center shadow-inner"></div>
+
+            <div id="announcement-box" class="stone-corners p-3 border-2 text-xs space-y-1 max-h-32 overflow-y-auto custom-scroll" style="border-color: var(--metal-gold); background: var(--stone-panel); color: var(--parchment-dim);"></div>
 
             <section id="player-controls-panel" class="hidden">
-                <div id="battle-actions-section" class="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow-sm">
-                    <h3 class="text-sm font-bold text-gray-300 mb-3">⚔️ あなたのアクション</h3>
+                <div id="battle-actions-section" class="stone-corners p-5 border-2" style="border-color: var(--stone-light); background: var(--stone-panel);">
+                    <h3 class="rune-heading text-sm font-display font-bold mb-3">あなたのアクション</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
-                        <button onclick="performAction('attack')" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold p-3 rounded-lg text-sm transition shadow-sm">通常攻撃 <span class="text-[10px] block font-normal text-red-200">💥 20%で会心</span></button>
-                        <button onclick="performAction('skill')" class="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white font-bold p-3 rounded-lg text-sm transition shadow-sm">固有スキル <span class="text-[10px] block font-normal">消費SP: 50% / 火力2.5倍</span></button>
-                        <button id="btn-ultimate" onclick="performAction('ultimate')" class="bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-white font-bold p-3 rounded-lg text-sm transition shadow-sm">
+                        <button onclick="performAction('attack')" class="iron-btn-crimson font-display font-bold p-3 text-sm">通常攻撃 <span class="text-[10px] block font-normal opacity-80">💥 20%で会心</span></button>
+                        <button onclick="performAction('skill')" class="iron-btn-indigo font-display font-bold p-3 text-sm">固有スキル <span class="text-[10px] block font-normal opacity-80">消費SP: 50% / 火力2.5倍</span></button>
+                        <button id="btn-ultimate" onclick="performAction('ultimate')" class="iron-btn-gold font-display font-bold p-3 text-sm">
                             <span id="btn-ultimate-label">必殺技</span>
-                            <span id="btn-ultimate-desc" class="text-[10px] block font-normal text-yellow-100"></span>
+                            <span id="btn-ultimate-desc" class="text-[10px] block font-normal opacity-80"></span>
                         </button>
-                        <button onclick="performAction('idle')" class="bg-gray-700 hover:bg-gray-600 text-gray-200 font-bold p-3 rounded-lg text-sm transition border border-gray-600">警戒(パス) <span class="text-[10px] block font-normal text-gray-400">行動スキップ</span></button>
+                        <button onclick="performAction('idle')" class="iron-btn font-display font-bold p-3 text-sm">警戒(パス) <span class="text-[10px] block font-normal opacity-70">行動スキップ</span></button>
                     </div>
                 </div>
 
-                <div id="ready-action-section" class="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow-sm hidden flex-col gap-4">
-                    <div class="bg-purple-950/40 p-3 rounded border border-purple-900/60">
-                        <h4 class="text-xs font-bold text-purple-400 mb-1">👁️ 不穏な影</h4>
-                        <p id="suspicious-move-text" class="text-[11px] text-purple-200 italic"></p>
-                    </div>
-                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-700">
-                        <h4 class="text-xs font-bold text-amber-400 mb-3">🧙‍♂️ 闇の放浪商人 ショップ</h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div class="bg-gray-800 p-3 rounded border border-gray-700 flex flex-col justify-between">
-                                <div><h4 class="font-bold text-gray-200 text-xs">鋼鉄のブロードソード</h4><p class="text-[10px] text-gray-400">攻撃力+15</p></div>
-                                <button onclick="buyItem('iron_sword', 60)" class="mt-2 w-full bg-amber-700 hover:bg-amber-600 text-white text-xs font-bold py-1 px-2 rounded flex justify-between"><span>購入</span><span class="text-yellow-300">60 G</span></button>
-                            </div>
-                            <div class="bg-gray-800 p-3 rounded border border-gray-700 flex flex-col justify-between">
-                                <div><h4 class="font-bold text-gray-200 text-xs">魔王殺しのギガントアックス</h4><p class="text-[10px] text-gray-400">攻撃力+40</p></div>
-                                <button onclick="buyItem('giant_axe', 140)" class="mt-2 w-full bg-red-700 hover:bg-red-600 text-white text-xs font-bold py-1 px-2 rounded flex justify-between"><span>購入</span><span class="text-yellow-300">140 G</span></button>
-                            </div>
-                            <div class="bg-gray-800 p-3 rounded border border-gray-700 flex flex-col justify-between">
-                                <div><h4 class="font-bold text-gray-200 text-xs">情報屋の身辺リーク</h4><p class="text-[10px] text-gray-400">機密情報</p></div>
-                                <button onclick="buyItem('info', 120)" class="mt-2 w-full bg-indigo-700 hover:bg-indigo-600 text-white text-xs font-bold py-1 px-2 rounded flex justify-between"><span>購入</span><span class="text-yellow-300">120 G</span></button>
-                            </div>
-                        </div>
+                <div id="ready-action-section" class="stone-corners p-5 border-2 hidden flex-col gap-4" style="border-color: var(--stone-light); background: var(--stone-panel);">
+                    <div class="p-3 border" style="background: var(--well); border-color: var(--stone-light);">
+                        <h4 class="text-xs font-display font-bold mb-1" style="color: var(--metal-silver);">👁 不穏な影</h4>
+                        <p id="suspicious-move-text" class="text-[11px] italic" style="color: var(--parchment-dim);"></p>
                     </div>
                     <div class="text-center mt-2">
-                        <button onclick="toggleReadyStatus()" id="btn-ready-toggle" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-6 rounded-lg text-sm transition shadow-md w-full sm:w-auto">次の戦闘の準備を完了する</button>
+                        <button onclick="toggleReadyStatus()" id="btn-ready-toggle" class="iron-btn-indigo font-display font-bold py-2 px-6 text-sm w-full sm:w-auto">次の戦闘の準備を完了する</button>
                     </div>
                 </div>
             </section>
 
-            <div id="mystery-section" class="border-t-4 border-red-700 bg-red-950/10 p-5 rounded-xl hidden flex flex-col gap-4">
-                <div class="bg-red-900/30 p-4 rounded-xl border border-red-800 text-center">
-                    <h3 class="text-xl font-black text-red-400 mb-2">👑 第6面：魔王城に到達 ーー しかし、事件発生</h3>
-                    <p class="text-xs text-red-200 leading-relaxed max-w-2xl mx-auto">
+            <div id="mystery-section" class="border-t-4 p-5 hidden flex flex-col gap-4 stone-corners" style="border-color: var(--ember); background: var(--stone-panel);">
+                <div class="p-4 border text-center" style="background: var(--well); border-color: var(--ember);">
+                    <h3 class="text-xl font-display font-black mb-2" style="color: var(--ember-bright);">👑 第6面：魔王城に到達 ーー しかし、事件発生</h3>
+                    <p class="text-xs leading-relaxed max-w-2xl mx-auto" style="color: var(--parchment-dim);">
                         魔王を殺したのは誰だ？目的は何だ？そして、道中不可解な動きをしていた裏切り者は……？<br>
                         これより、すべての行動記録を開示し、最終議論を開始します。
                     </p>
                 </div>
-                <div class="bg-gray-900 p-4 rounded-lg border border-gray-800">
-                    <p class="text-xs font-bold text-yellow-500 mb-2">📊 【全プレイヤーの完全行動履歴・大開示】</p>
-                    <div id="final-unveiled-logs" class="text-xs space-y-1.5 max-h-80 overflow-y-auto custom-scroll font-mono text-gray-300"></div>
+                <div class="p-4 border" style="background: var(--well); border-color: var(--stone-light);">
+                    <p class="text-xs font-display font-bold mb-2" style="color: var(--metal-gold-bright);">📊 【全プレイヤーの完全行動履歴・大開示】</p>
+                    <div id="final-unveiled-logs" class="text-xs space-y-1.5 max-h-80 overflow-y-auto custom-scroll font-mono" style="color: var(--parchment-dim);"></div>
                 </div>
             </div>
 
-            <section id="gm-panel" class="bg-gray-800 p-6 rounded-xl border-2 border-indigo-600 shadow-md hidden flex flex-col gap-4">
-                <h2 class="text-base font-black text-indigo-400">👑 GM専用コントロールパネル</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <button onclick="triggerResetAllDevices()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold py-2 px-4 rounded">全員の端末ロック解除</button>
-                    <button onclick="triggerWipeRescue()" class="bg-red-700 hover:bg-red-600 text-white text-xs font-bold py-2 px-4 rounded">全滅救済（HP/SP MAX＆バフ）</button>
+            <section id="memo-section" class="hidden stone-corners p-5 border-2 flex flex-col gap-3" style="border-color: var(--stone-light); background: var(--stone-panel);">
+                <h3 class="rune-heading rune-left text-sm font-display font-bold border-b pb-2" style="border-color: var(--stone-light);">メモ (自分のみ)</h3>
+                <div class="flex gap-2">
+                    <input type="text" id="bottom-memo-input" placeholder="推理を入力..." class="flex-grow px-3 py-2 text-xs border" style="background: var(--well); border-color: var(--stone-light); color: var(--parchment);">
+                    <button onclick="addPersonalMemoModal()" class="iron-btn-emerald px-4 py-2 text-xs font-display font-bold">追加</button>
                 </div>
-                <div class="bg-gray-900 p-3 rounded border border-gray-800">
-                    <label class="block text-xs font-bold text-gray-400 mb-2">ステージ強制移動</label>
+                <div id="bottom-memo-list" class="space-y-2 text-xs"></div>
+            </section>
+
+            <section id="gm-panel" class="stone-corners p-6 border-2 shadow-md hidden flex flex-col gap-4" style="border-color: var(--metal-gold); background: var(--stone-panel);">
+                <h2 class="rune-heading rune-left text-base font-display font-black">GM専用コントロールパネル</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button onclick="triggerResetAllDevices()" class="iron-btn-gold text-xs font-display font-bold py-2 px-4">全員の端末ロック解除</button>
+                    <button onclick="triggerWipeRescue()" class="iron-btn-crimson text-xs font-display font-bold py-2 px-4">全滅救済（HP/SP MAX＆バフ）</button>
+                </div>
+                <div class="p-3 border" style="background: var(--well); border-color: var(--stone-light);">
+                    <label class="block text-xs font-display font-bold mb-2" style="color: var(--metal-silver);">ステージ強制移動</label>
                     <div class="flex flex-wrap gap-2">
-                        <button onclick="changeStageAndPhase(1, 'mob_1')" class="bg-gray-800 text-[10px] p-1.5 rounded border border-gray-700">1面:モブ1</button>
-                        <button onclick="changeStageAndPhase(1, 'rest')" class="bg-gray-800 text-[10px] p-1.5 rounded border border-gray-700">1面:休憩</button>
-                        <button onclick="changeStageAndPhase(5, 'boss')" class="bg-amber-900 text-white text-[10px] p-1.5 rounded border border-amber-700">5面:大ボス</button>
-                        <button onclick="changeStageAndPhase(6, 'mystery')" class="bg-red-900 text-white font-bold text-[10px] p-1.5 rounded border border-red-700">6面:マダミス</button>
+                        <button onclick="changeStageAndPhase(1, 'mob_1')" class="iron-btn text-[10px] p-1.5">1面:モブ1</button>
+                        <button onclick="changeStageAndPhase(1, 'rest')" class="iron-btn text-[10px] p-1.5">1面:休憩</button>
+                        <button onclick="changeStageAndPhase(5, 'boss')" class="iron-btn-gold text-[10px] p-1.5">5面:大ボス</button>
+                        <button onclick="changeStageAndPhase(6, 'mystery')" class="iron-btn-crimson font-bold text-[10px] p-1.5">6面:マダミス</button>
                     </div>
                 </div>
-                <div class="bg-gray-900 p-3 rounded border border-gray-800">
-                    <h3 class="text-xs font-bold text-indigo-400 mb-1">🤫 リアルタイム全ログ監視 ＆ 抹消</h3>
-                    <div class="max-h-40 overflow-y-auto custom-scroll p-2 text-[10px] font-mono space-y-1 bg-gray-950 rounded" id="gm-log-monitor-list"></div>
+                <div class="p-3 border" style="background: var(--well); border-color: var(--stone-light);">
+                    <h3 class="text-xs font-display font-bold mb-1" style="color: var(--metal-gold-bright);">🤫 リアルタイム全ログ監視 ＆ 抹消</h3>
+                    <div class="flex flex-wrap gap-1.5 mb-2" id="gm-log-filter-buttons"></div>
+                    <div class="max-h-40 overflow-y-auto custom-scroll p-2 text-[10px] font-mono space-y-1" style="background: var(--well); color: var(--parchment-dim);" id="gm-log-monitor-list"></div>
                 </div>
             </section>
         </div>
     </main>
 
     <div id="personal-modal" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-gray-800 rounded-xl w-full max-w-lg border border-indigo-500 shadow-2xl h-[85vh] flex flex-col overflow-hidden">
-            <div class="bg-gray-900 p-4 border-b border-gray-700 flex justify-between items-center">
-                <h2 class="text-base font-bold text-indigo-300">ステータス・装備設定</h2>
-                <button onclick="toggleModal(false)" class="text-gray-400 hover:text-white text-xl font-bold px-2">&times;</button>
+        <div class="stone-corners w-full max-w-lg border-2 shadow-2xl h-[85vh] flex flex-col overflow-hidden" style="border-color: var(--metal-gold); background: var(--stone-panel);">
+            <div class="p-4 border-b-2 flex justify-between items-center" style="background: var(--well); border-color: var(--stone-light);">
+                <h2 class="rune-heading rune-left text-base font-display font-bold">ステータス・装備設定</h2>
+                <button onclick="toggleModal(false)" class="text-xl font-bold px-2" style="color: var(--parchment-dim);">&times;</button>
             </div>
             
-            <div class="p-4 bg-gray-800 border-b border-gray-700 grid grid-cols-4 gap-2 text-center">
-                <div class="bg-gray-900 p-2 rounded"><p class="text-[10px] text-gray-500">HP</p><p class="text-sm font-bold text-emerald-400" id="modal-stat-hp">-/-</p></div>
-                <div class="bg-gray-900 p-2 rounded"><p class="text-[10px] text-gray-500">SP</p><p class="text-sm font-bold text-purple-400" id="modal-stat-sp">-%</p></div>
-                <div class="bg-gray-900 p-2 rounded"><p class="text-[10px] text-gray-500">攻撃力</p><p class="text-sm font-bold text-amber-400" id="modal-stat-atk">-</p></div>
-                <div class="bg-gray-900 p-2 rounded"><p class="text-[10px] text-gray-500">所持金</p><p class="text-sm font-bold text-yellow-400" id="modal-stat-gold">-G</p></div>
+            <div class="p-4 border-b grid grid-cols-4 gap-2 text-center" style="background: var(--stone-panel); border-color: var(--stone-light);">
+                <div class="p-2 border" style="background: var(--well); border-color: var(--stone-light);"><p class="text-[10px]" style="color: var(--parchment-dim);">HP</p><p class="text-sm font-display font-bold" style="color: #c97a63;" id="modal-stat-hp">-/-</p></div>
+                <div class="p-2 border" style="background: var(--well); border-color: var(--stone-light);"><p class="text-[10px]" style="color: var(--parchment-dim);">SP</p><p class="text-sm font-display font-bold" style="color: #7ba0c4;" id="modal-stat-sp">-%</p></div>
+                <div class="p-2 border" style="background: var(--well); border-color: var(--stone-light);"><p class="text-[10px]" style="color: var(--parchment-dim);">攻撃力</p><p class="text-sm font-display font-bold" style="color: var(--ember-bright);" id="modal-stat-atk">-</p></div>
+                <div class="p-2 border" style="background: var(--well); border-color: var(--stone-light);"><p class="text-[10px]" style="color: var(--parchment-dim);">所持金</p><p class="text-sm font-display font-bold" style="color: var(--metal-gold-bright);" id="modal-stat-gold">-G</p></div>
             </div>
 
-            <div class="flex p-3 gap-2 bg-gray-850">
-                <button onclick="showModalTab('equip')" id="tab-btn-equip" class="flex-1 bg-indigo-600 text-white py-1.5 rounded text-xs font-bold transition">装備変更</button>
-                <button onclick="showModalTab('memo')" id="tab-btn-memo" class="flex-1 bg-gray-700 text-gray-300 py-1.5 rounded text-xs font-bold transition">秘密のメモ</button>
-                <button onclick="showModalTab('secret')" id="tab-btn-secret" class="flex-1 bg-gray-700 text-gray-300 py-1.5 rounded text-xs font-bold transition">極秘書類</button>
+            <div class="flex p-3 gap-2" style="background: var(--well);">
+                <button onclick="showModalTab('equip')" id="tab-btn-equip" class="flex-1 iron-btn-indigo py-1.5 text-xs font-display font-bold">装備変更</button>
+                <button onclick="showModalTab('secret')" id="tab-btn-secret" class="flex-1 iron-btn py-1.5 text-xs font-display font-bold">極秘書類</button>
             </div>
 
-            <div id="modal-content" class="flex-grow overflow-y-auto custom-scroll p-4 text-sm bg-gray-800">
+            <div id="modal-content" class="flex-grow overflow-y-auto custom-scroll p-4 text-sm" style="background: var(--stone-panel);">
                 </div>
+        </div>
+    </div>
+
+    <div id="loot-phase-modal" class="fixed inset-0 bg-black/80 z-[110] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="stone-corners w-full max-w-2xl border-2 shadow-2xl max-h-[90vh] flex flex-col overflow-hidden" style="border-color: var(--metal-gold); background: var(--stone-panel);">
+            <div class="p-4 border-b-2" style="background: var(--well); border-color: var(--stone-light);">
+                <h2 class="rune-heading rune-left text-base font-display font-bold" id="loot-phase-title">戦利品の分配</h2>
+            </div>
+            <div id="loot-phase-content" class="flex-grow overflow-y-auto custom-scroll p-4 text-sm" style="background: var(--stone-panel);"></div>
         </div>
     </div>
 
@@ -353,68 +587,113 @@
         const db = getDatabase(app);
 
         // キャラクター固有データ (表示名など)
+        // 5属性の定義
+        const elementData = {
+            fire: { name: "火", icon: "🔥", color: "#b6452f" },
+            wind: { name: "風", icon: "🌪", color: "#5a8a5a" },
+            ice: { name: "氷", icon: "❄", color: "#5a8aa8" },
+            dark: { name: "闇", icon: "🌑", color: "#5a4a78" },
+            light: { name: "光", icon: "✨", color: "#c8a830" }
+        };
+
+        // 装備部位の定義
+        const equipmentSlots = {
+            head: { name: "頭防具", icon: "🪖" },
+            body: { name: "胴防具", icon: "🛡" },
+            feet: { name: "足防具", icon: "👞" },
+            weapon: { name: "武器", icon: "⚔" },
+            accessory: { name: "アクセサリー", icon: "💍" }
+        };
+
         const charData = {
             gm: { name: "👑 GM", icon: "👑" },
             ninja: {
-                name: "🥷 忍", icon: "🥷",
+                name: "🥷 忍", icon: "🥷", element: "wind",
                 secret: "【忍の秘密】東の国からの密書：『魔王の討伐後、どさくさに紛れて氷姫を暗殺せよ。』",
-                ultimate: { name: "影分身・乱れ斬り", type: "attack", multiplier: 5.0, desc: "敵に超大ダメージ(atk×5.0)" }
+                ultimate: { name: "影分身・乱れ斬り", type: "attack", multiplier: 5.0, desc: "敵に超大ダメージ(atk×5.0)" },
+                shopItem: { id: "ninja_upgrade", name: "影渡りの双苦無", desc: "攻撃力+25 / 必殺技の冷却が一瞬で巡る、と噂の逸品", cost: 150 }
             },
             demon: {
-                name: "😈 悪魔", icon: "😈",
+                name: "😈 悪魔", icon: "😈", element: "dark",
                 secret: "【悪魔の秘密】ちぎれた魔王の肖像画：かつて魔王の右腕だった。魔王の死の真相を探っている。",
-                ultimate: { name: "破滅の業火", type: "attack", multiplier: 5.0, desc: "敵に超大ダメージ(atk×5.0)" }
+                ultimate: { name: "破滅の業火", type: "attack", multiplier: 5.0, desc: "敵に超大ダメージ(atk×5.0)" },
+                shopItem: { id: "demon_upgrade", name: "冥府の魔杖", desc: "攻撃力+30 / 触れた者の魂を僅かに喰らうという禁断の杖", cost: 160 }
             },
             priest_bro: {
-                name: "👦 神官兄", icon: "👦",
+                name: "👦 神官兄", icon: "👦", element: "light",
                 secret: "【神官兄の秘密】禁忌の魔術書の破片：『魂なき器にかりそめの命を与える呪術』。姫の遺体を動かしていた？",
-                ultimate: { name: "聖光の祝福", type: "heal", desc: "味方全員のHP・SPを全回復" }
+                ultimate: { name: "聖光の祝福", type: "heal", desc: "味方全員のHP・SPを全回復" },
+                shopItem: { id: "priest_bro_upgrade", name: "聖域の大盾", desc: "攻撃力+15 / 持つだけで心が安らぐと言われる聖遺物", cost: 130 }
             },
             priest_sis: {
-                name: "👧 神官妹", icon: "👧",
+                name: "👧 神官妹", icon: "👧", element: "ice",
                 secret: "【神官妹の秘密】血のついた日記帳：『氷の一族が故郷を滅ぼした。姫を絶対に許さない』。",
-                ultimate: { name: "氷の祝詞", type: "buff", multiplier: 1.5, desc: "味方全員の攻撃力が一時上昇" }
+                ultimate: { name: "氷の祝詞", type: "buff", multiplier: 1.5, desc: "味方全員の攻撃力が一時上昇" },
+                shopItem: { id: "priest_sis_upgrade", name: "氷晶の祈杖", desc: "攻撃力+18 / 氷の一族に伝わる秘宝、妙に手に馴染む", cost: 130 }
             }
         };
 
         // 【機能追加】エネミーにも素早さ(agi)を設定
         const stageMasterData = {
             1: {
-                mob_1: { name: "砦の猟犬", hp: 120, goldReward: 30, agi: 25 },
-                mob_2: { name: "砦の斥候兵", hp: 160, goldReward: 40, agi: 35 },
+                mob_1: { name: "砦の猟犬", hp: 120, goldReward: 30, agi: 25, element: "wind" },
+                mob_2: { name: "砦の斥候兵", hp: 160, goldReward: 40, agi: 35, element: "wind" },
                 rest: { suspicious: "【1面の不審な影】休憩中、忍が何やら懐から奇妙な暗号文を取り出し、解読したあとに慌てて暖炉の火に投げ入れているのを目撃した。" },
-                boss: { name: "砦の防衛総督ガルバ", hp: 450, agi: 45 }
+                boss: { name: "砦の防衛総督ガルバ", hp: 450, agi: 45, element: "fire", goldReward: 150 }
             },
             2: {
-                mob_1: { name: "迷い出たゾンビ", hp: 180, goldReward: 40, agi: 28 },
-                mob_2: { name: "腐食の死霊騎士", hp: 220, goldReward: 50, agi: 38 },
+                mob_1: { name: "迷い出たゾンビ", hp: 180, goldReward: 40, agi: 28, element: "dark" },
+                mob_2: { name: "腐食の死霊騎士", hp: 220, goldReward: 50, agi: 38, element: "dark" },
                 rest: { suspicious: "【2面の不審な影】物資調達の際、悪魔が『とある魔族の紋章が入ったペンダント』を見つけ、激しく動揺した様子で懐に隠すのを目撃した。" },
-                boss: { name: "深紅の魔騎士レオン", hp: 650, agi: 48 }
+                boss: { name: "深紅の魔騎士レオン", hp: 650, agi: 48, element: "fire", goldReward: 200 }
             },
             3: {
-                mob_1: { name: "毒霧の幼生蜘蛛", hp: 240, goldReward: 50, agi: 30 },
-                mob_2: { name: "幻惑の怪魔マフラー", hp: 280, goldReward: 60, agi: 40 },
+                mob_1: { name: "毒霧の幼生蜘蛛", hp: 240, goldReward: 50, agi: 30, element: "dark" },
+                mob_2: { name: "幻惑の怪魔マフラー", hp: 280, goldReward: 60, agi: 40, element: "light" },
                 rest: { suspicious: "【3面の不審な影】霧が晴れる一瞬、神官兄が黒い魔術書の破片を凝視し、怪しく微笑んでいたのを見てしまった。" },
-                boss: { name: "巨大狂蜘蛛アラクネ", hp: 850, agi: 50 }
+                boss: { name: "巨大狂蜘蛛アラクネ", hp: 850, agi: 50, element: "dark", goldReward: 260 }
             },
             4: {
-                mob_1: { name: "魔界の特攻足軽", hp: 320, goldReward: 60, agi: 35 },
-                mob_2: { name: "魔界の大盾重装兵", hp: 380, goldReward: 70, agi: 45 },
+                mob_1: { name: "魔界の特攻足軽", hp: 320, goldReward: 60, agi: 35, element: "fire" },
+                mob_2: { name: "魔界の大盾重装兵", hp: 380, goldReward: 70, agi: 45, element: "ice" },
                 rest: { suspicious: "【4面の不審な影】宿営地での夜、神官妹が血の滲んだ古い日記帳を抱きしめ怨念を呟いているのを聞いてしまった。" },
-                boss: { name: "突撃魔導要塞要撃機", hp: 1100, agi: 55 }
+                boss: { name: "突撃魔導要塞要撃機", hp: 1100, agi: 55, element: "wind", goldReward: 320 }
             },
             5: {
-                mob_1: { name: "幻影の魔女・第一の影", hp: 400, goldReward: 80, agi: 40 },
-                mob_2: { name: "幻影の魔女・第二の影", hp: 450, goldReward: 90, agi: 50 },
+                mob_1: { name: "幻影の魔女・第一の影", hp: 400, goldReward: 80, agi: 40, element: "ice" },
+                mob_2: { name: "幻影の魔女・第二の影", hp: 450, goldReward: 90, agi: 50, element: "light" },
                 rest: { suspicious: "【5面の不審な影】最後の取引の裏で、全員の荷物から少しずつ『魔王城の結界石』が消えていることが発覚した。" },
-                boss: { name: "大至高・幻影の魔女", hp: 1800, agi: 60 }
+                boss: { name: "大至高・幻影の魔女", hp: 1800, agi: 60, element: "dark", goldReward: 400 }
             }
         };
+
+        // 全員購入可能な共通アイテム
+        const commonShopItems = [
+            { id: "potion_hp", name: "傷薬の小瓶", desc: "HPを50回復(所持するだけ・使用は未実装)", cost: 30, type: "consumable" },
+            { id: "potion_sp", name: "魔力の結晶", desc: "SPを50%回復(所持するだけ・使用は未実装)", cost: 40, type: "consumable" },
+            { id: "elixir", name: "万能薬エリクサー", desc: "HP・SP全回復(所持するだけ・使用は未実装)", cost: 100, type: "consumable" }
+        ];
+
+        // 部位別の戦利品名テンプレート (属性をはめ込む)
+        const lootItemTemplates = {
+            head: { base: "の兜", atkBonus: { mob: 6, boss: 10 } },
+            body: { base: "の鎧", atkBonus: { mob: 8, boss: 14 } },
+            feet: { base: "のブーツ", atkBonus: { mob: 4, boss: 7 } },
+            weapon: { base: "の武器", atkBonus: { mob: 12, boss: 20 } },
+            accessory: { base: "の護符", atkBonus: { mob: 5, boss: 9 } }
+        };
+
+        function buildLootItemName(slot, elementKey) {
+            const el = elementData[elementKey];
+            return `${el.icon}${el.name}属性${lootItemTemplates[slot].base}`;
+        }
 
         let currentRole = null;
         let localGameState = {};
         let isFirstLoad = true;
         let currentModalTab = 'equip';
+        let lastSeenEffectId = null;
+        let memosSubscribed = false;
 
         // 🔄 Firebaseデータベース購読・初期化
         onValue(ref(db, 'gameState'), (snapshot) => {
@@ -428,11 +707,12 @@
                     enemyMaxHp: 120,
                     rescueBuffActive: false,
                     deviceResetCounter: 0,
+                    currentTurnIndex: 0,
                     players: {
-                        ninja: { hp: 120, maxHp: 120, baseAtk: 15, atk: 15, gold: 0, sp: 0, agi: 50, equipped: "初期のクナイ", inventory: ["初期のクナイ"], isReady: false, ultimateUsedStage: 0 },
-                        demon: { hp: 150, maxHp: 150, baseAtk: 20, atk: 20, gold: 0, sp: 0, agi: 40, equipped: "見習いの杖", inventory: ["見習いの杖"], isReady: false, ultimateUsedStage: 0 },
-                        priest_bro: { hp: 200, maxHp: 200, baseAtk: 10, atk: 10, gold: 0, sp: 0, agi: 30, equipped: "古びた盾", inventory: ["古びた盾"], isReady: false, ultimateUsedStage: 0 },
-                        priest_sis: { hp: 100, maxHp: 100, baseAtk: 8, atk: 8, gold: 0, sp: 0, agi: 20, equipped: "ただの棒", inventory: ["ただの棒"], isReady: false, ultimateUsedStage: 0 }
+                        ninja: { hp: 120, maxHp: 120, baseAtk: 15, atk: 15, gold: 0, sp: 0, agi: 50, equipped: "初期のクナイ", inventory: ["初期のクナイ"], isReady: false, ultimateUsedStage: 0, element: "wind", equipment: { head: null, body: null, feet: null, weapon: null, accessory: null } },
+                        demon: { hp: 150, maxHp: 150, baseAtk: 20, atk: 20, gold: 0, sp: 0, agi: 40, equipped: "見習いの杖", inventory: ["見習いの杖"], isReady: false, ultimateUsedStage: 0, element: "dark", equipment: { head: null, body: null, feet: null, weapon: null, accessory: null } },
+                        priest_bro: { hp: 200, maxHp: 200, baseAtk: 10, atk: 10, gold: 0, sp: 0, agi: 30, equipped: "古びた盾", inventory: ["古びた盾"], isReady: false, ultimateUsedStage: 0, element: "light", equipment: { head: null, body: null, feet: null, weapon: null, accessory: null } },
+                        priest_sis: { hp: 100, maxHp: 100, baseAtk: 8, atk: 8, gold: 0, sp: 0, agi: 20, equipped: "ただの棒", inventory: ["ただの棒"], isReady: false, ultimateUsedStage: 0, element: "ice", equipment: { head: null, body: null, feet: null, weapon: null, accessory: null } }
                     }
                 });
             } else {
@@ -440,8 +720,13 @@
                 if (isFirstLoad) {
                     checkDeviceInitialLock();
                     isFirstLoad = false;
+                    lastSeenEffectId = localGameState.effectTrigger?.id || null;
                 } else {
                     checkDeviceResetEvent();
+                    if (localGameState.effectTrigger && localGameState.effectTrigger.id !== lastSeenEffectId) {
+                        lastSeenEffectId = localGameState.effectTrigger.id;
+                        triggerActionEffect(localGameState.effectTrigger.type, localGameState.effectTrigger);
+                    }
                 }
                 updateUI();
                 if (document.getElementById("personal-modal").classList.contains("hidden") === false) {
@@ -459,8 +744,9 @@
                 const logs = Object.values(snapshot.val());
                 logs.forEach(log => {
                     const div = document.createElement("div");
-                    div.className = "border-b border-gray-800 pb-1";
-                    if (log.includes("💥")) div.className += " text-yellow-400 font-bold bg-amber-950/20 px-1 rounded";
+                    div.className = "border-b pb-1";
+                    div.style.borderColor = "var(--stone-light)";
+                    if (log.includes("💥")) { div.style.color = "var(--ember-bright)"; div.className += " font-display font-bold"; }
                     div.innerText = log;
                     box.appendChild(div);
                 });
@@ -469,32 +755,63 @@
             }
         });
 
-        onValue(ref(db, 'actionLogs'), (snapshot) => {
+        let gmLogFilter = 'all';
+        window.setGmLogFilter = function(actor) {
+            gmLogFilter = actor;
+            renderGmLogFilterButtons();
+            renderActionLogs();
+        };
+
+        function renderGmLogFilterButtons() {
+            const container = document.getElementById("gm-log-filter-buttons");
+            if (!container) return;
+            const actors = ['all', ...Object.keys(charData).filter(k => k !== 'gm').map(k => charData[k].name)];
+            container.innerHTML = actors.map(a => {
+                const label = a === 'all' ? '全員' : a;
+                const active = gmLogFilter === a;
+                return `<button onclick="setGmLogFilter('${a.replace(/'/g, "\\'")}')" class="${active ? 'iron-btn-gold' : 'iron-btn'} text-[10px] px-2 py-1 font-display font-bold">${label}</button>`;
+            }).join('');
+        }
+
+        let latestActionLogsSnapshot = null;
+        let latestTurnOrder = [];
+
+        function renderActionLogs() {
             const gmLogList = document.getElementById("gm-log-monitor-list");
             const finalLogList = document.getElementById("final-unveiled-logs");
             if (gmLogList) gmLogList.innerHTML = "";
             if (finalLogList) finalLogList.innerHTML = "";
 
-            if (snapshot.exists()) {
-                Object.entries(snapshot.val()).forEach(([id, logObj]) => {
+            if (latestActionLogsSnapshot && latestActionLogsSnapshot.exists()) {
+                Object.entries(latestActionLogsSnapshot.val()).forEach(([id, logObj]) => {
                     const stageTag = logObj.stage === 6 ? "6面魔王城" : `${logObj.stage}面-${logObj.phase || ''}`;
                     const fullText = `[${stageTag}] ${logObj.actor}: ${logObj.actionText}`;
 
-                    if (gmLogList) {
+                    if (gmLogList && (gmLogFilter === 'all' || gmLogFilter === logObj.actor)) {
                         const gmRow = document.createElement("div");
-                        gmRow.className = "flex justify-between items-center bg-gray-900 p-1 rounded gap-2";
-                        gmRow.innerHTML = `<span class="truncate">${fullText}</span><button class="bg-red-950 hover:bg-red-800 text-red-300 px-1 py-0.5 rounded border border-red-900">消去</button>`;
+                        gmRow.className = "flex justify-between items-center p-1 gap-2 border";
+                        gmRow.style.background = "var(--stone-panel)";
+                        gmRow.style.borderColor = "var(--stone-light)";
+                        gmRow.innerHTML = `<span class="truncate">${fullText}</span><button class="px-1 py-0.5 border" style="background: var(--well); color: var(--ember-bright); border-color: var(--ember);">消去</button>`;
                         gmRow.querySelector("button").addEventListener("click", () => remove(ref(db, `actionLogs/${id}`)));
                         gmLogList.appendChild(gmRow);
                     }
                     if (finalLogList) {
                         const playerRow = document.createElement("div");
-                        playerRow.className = "bg-gray-950 p-1.5 rounded border border-gray-900";
+                        playerRow.className = "p-1.5 border";
+                        playerRow.style.background = "var(--stone-panel)";
+                        playerRow.style.borderColor = "var(--stone-light)";
                         playerRow.innerText = fullText;
                         finalLogList.appendChild(playerRow);
                     }
                 });
             }
+        }
+
+        onValue(ref(db, 'actionLogs'), (snapshot) => {
+            latestActionLogsSnapshot = snapshot;
+            renderGmLogFilterButtons();
+            renderActionLogs();
         });
 
         // 🎭 役職ロック
@@ -513,19 +830,26 @@
             currentRole = role;
             document.getElementById("role-select-panel").classList.add("hidden");
             document.getElementById("shared-main-view").classList.remove("hidden");
-            
-            const announce = document.getElementById("active-role-announcement");
-            announce.innerHTML = `<span>あなたの担当： <span class="text-yellow-400 text-base ml-1">${charData[role].name}</span></span>
-                                  <span class="text-[10px] text-emerald-400 bg-emerald-950/60 border border-emerald-800 px-2 py-0.5 rounded-full">端末ロック中</span>`;
 
             if (role === 'gm') {
                 document.getElementById("gm-panel").classList.remove("hidden");
                 document.getElementById("player-controls-panel").classList.add("hidden");
                 document.getElementById("btn-menu").classList.add("hidden");
+                document.getElementById("memo-section").classList.add("hidden");
             } else {
                 document.getElementById("gm-panel").classList.add("hidden");
                 document.getElementById("player-controls-panel").classList.remove("hidden");
                 document.getElementById("btn-menu").classList.remove("hidden");
+                document.getElementById("memo-section").classList.remove("hidden");
+                if (!memosSubscribed) {
+                    subscribeMemos(role);
+                    memosSubscribed = true;
+                }
+                const memoInput = document.getElementById("bottom-memo-input");
+                if (memoInput && !memoInput.dataset.bound) {
+                    memoInput.addEventListener("keydown", (e) => { if(e.key === "Enter") addPersonalMemoModal(); });
+                    memoInput.dataset.bound = "true";
+                }
             }
             updateUI();
         }
@@ -557,6 +881,8 @@
             let phaseText = { "mob_1": "前哨戦1", "mob_2": "前哨戦2", "rest": "休憩所", "boss": "エリアボス", "mystery": "最終議論" }[phase] || "不明";
             document.getElementById("current-phase-display").innerText = phaseText;
 
+            renderLootPhase();
+
             // --- パーティ一覧のレンダリング (共有画面の左側) ---
             const partyContainer = document.getElementById("party-list-container");
             if (!partyContainer) return;
@@ -566,27 +892,30 @@
                 const hpPercent = p.maxHp > 0 ? (p.hp / p.maxHp) * 100 : 0;
                 const ult = charData[key].ultimate;
                 const ultReady = ult && (p.ultimateUsedStage || 0) < stage;
+                const elKey = p.element || charData[key].element;
+                const el = elementData[elKey];
                 partyContainer.innerHTML += `
-                    <div class="bg-gray-900 p-3 rounded-lg border ${isMe ? 'border-indigo-500' : 'border-gray-700'} flex flex-col gap-2 relative">
-                        ${isMe ? '<span class="absolute -top-2 -right-2 bg-indigo-600 text-white text-[9px] px-1.5 rounded-full">YOU</span>' : ''}
+                    <div class="stone-corners p-3 border-2 flex flex-col gap-2 relative" style="background: var(--stone-panel); border-color: ${isMe ? 'var(--metal-gold)' : 'var(--stone-light)'};">
+                        ${isMe ? `<span class="absolute -top-2 -right-2 text-[9px] px-1.5 font-display font-bold" style="background: var(--metal-gold); color: var(--stone-dark);">YOU</span>` : ''}
                         <div class="flex justify-between items-center">
-                            <span class="font-bold text-sm ${p.hp <= 0 ? 'text-gray-500 line-through' : 'text-gray-200'}">${charData[key].icon} ${charData[key].name.split(' ')[1]}</span>
-                            <span class="text-[10px] text-gray-400 bg-gray-800 px-1.5 rounded border border-gray-700 truncate max-w-[80px]">${p.equipped}</span>
+                            <span class="font-display font-bold text-sm ${p.hp <= 0 ? 'line-through opacity-50' : ''}" style="color: var(--parchment);">${charData[key].icon} ${charData[key].name.split(' ')[1]}</span>
+                            <span class="text-[10px] px-1.5 border font-display font-bold" style="background: var(--well); color: ${el.color}; border-color: var(--stone-light);" title="${el.name}属性">${el.icon}${el.name}</span>
+                        </div>
+                        <div class="text-[10px] px-1.5 border truncate" style="background: var(--well); color: var(--parchment-dim); border-color: var(--stone-light);">${p.equipped}</div>
+                        <div>
+                            <div class="flex justify-between text-[10px] mb-0.5"><span style="color: #c97a63;">HP</span><span style="color: var(--parchment-dim);">${p.hp}/${p.maxHp}</span></div>
+                            <div class="w-full h-1.5 overflow-hidden gauge-track"><div class="gauge-fill-hp h-full" style="width: ${hpPercent}%"></div></div>
                         </div>
                         <div>
-                            <div class="flex justify-between text-[10px] mb-0.5"><span class="text-emerald-400">HP</span><span class="text-gray-300">${p.hp}/${p.maxHp}</span></div>
-                            <div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden"><div class="bg-emerald-500 h-full" style="width: ${hpPercent}%"></div></div>
+                            <div class="flex justify-between text-[10px] mb-0.5"><span style="color: #7ba0c4;">SP</span><span style="color: var(--parchment-dim);">${p.sp}%</span></div>
+                            <div class="w-full h-1.5 overflow-hidden gauge-track"><div class="gauge-fill-sp h-full" style="width: ${p.sp}%"></div></div>
                         </div>
-                        <div>
-                            <div class="flex justify-between text-[10px] mb-0.5"><span class="text-purple-400">SP</span><span class="text-gray-300">${p.sp}%</span></div>
-                            <div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden"><div class="bg-purple-500 h-full" style="width: ${p.sp}%"></div></div>
-                        </div>
-                        ${ult ? `<div class="text-[9px] text-center px-1.5 py-0.5 rounded ${ultReady ? 'bg-amber-900/60 text-amber-300 border border-amber-700' : 'bg-gray-800 text-gray-500 border border-gray-700'}">${ultReady ? '💎 必殺技 準備OK' : '💎 必殺技 使用済み'}</div>` : ''}
+                        ${ult ? `<div class="text-[9px] text-center px-1.5 py-0.5 border" style="${ultReady ? 'background: rgba(184,134,11,0.15); color: var(--metal-gold-bright); border-color: var(--metal-gold);' : 'background: var(--well); color: var(--parchment-dim); border-color: var(--stone-light); opacity: 0.6;'}">${ultReady ? '💎 必殺技 準備OK' : '💎 必殺技 使用済み'}</div>` : ''}
                     </div>
                 `;
             });
 
-            // --- 素早さ(AGI)に基づく行動順の計算と表示 (ヘッダー右上) ---
+            // --- 素早さ(AGI)に基づく行動順の計算と表示 (3D空間右上) ---
             const turnOrder = [];
             Object.entries(localGameState.players).forEach(([key, p]) => {
                 if(p.hp > 0) turnOrder.push({ name: charData[key].icon, agi: p.agi, type: 'player' });
@@ -601,18 +930,28 @@
             }
 
             turnOrder.sort((a, b) => b.agi - a.agi); // 降順ソート
-            const turnDisplay = document.getElementById("turn-order-display");
-            const turnContainer = document.getElementById("turn-order-container");
+            latestTurnOrder = turnOrder;
+            const turnDisplay = document.getElementById("turn-order-panel-display");
+            const turnContainer = turnDisplay ? turnDisplay.closest("div.absolute") : null;
             if (turnOrder.length > 0 && phase !== 'rest' && stage !== 6) {
-                turnContainer.classList.remove("hidden");
-                turnDisplay.innerHTML = turnOrder.map(t => `<span class="${t.type === 'enemy' ? 'text-red-400 text-sm drop-shadow-[0_0_2px_red]' : 'text-gray-200'}">${t.name}</span>`).join('<span class="text-gray-600 text-[8px]">▶</span>');
+                if (turnContainer) turnContainer.classList.remove("hidden");
+                const curIdx = (localGameState.currentTurnIndex || 0) % turnOrder.length;
+                turnDisplay.innerHTML = turnOrder.map((t, i) => {
+                    const isCurrent = i === curIdx;
+                    const baseColor = t.type === 'enemy' ? 'var(--ember-bright)' : 'var(--parchment)';
+                    if (isCurrent) {
+                        return `<span class="text-lg" style="color: ${baseColor}; display: inline-block; padding: 2px 6px; border: 2px solid var(--metal-gold-bright); border-radius: 9999px; background: rgba(184,134,11,0.18); box-shadow: 0 0 8px rgba(184,134,11,0.5); animation: magic-pulse 1s ease-in-out infinite;">${t.name}</span>`;
+                    }
+                    return `<span class="text-base" style="color: ${baseColor}; opacity: 0.6;">${t.name}</span>`;
+                }).join(`<span class="text-[10px]" style="color: var(--stone-light);">▶</span>`);
             } else {
-                turnContainer.classList.add("hidden");
+                if (turnContainer) turnContainer.classList.add("hidden");
             }
 
             // --- 敵ステータスの表示 ---
             if (stage === 6 || phase === "mystery") {
                 document.getElementById("enemy-status-panel").classList.add("hidden");
+                document.getElementById("rest-shop-panel").classList.add("hidden");
                 document.getElementById("player-controls-panel").classList.add("hidden");
                 document.getElementById("mystery-section").classList.remove("hidden");
             } else {
@@ -626,14 +965,29 @@
                 document.getElementById("boss-hp-bar").style.width = `${bMax > 0 ? (bHp / bMax) * 100 : 0}%`;
 
                 if (phase === "rest") {
+                    document.getElementById("enemy-status-panel").classList.add("hidden");
+                    if (currentRole && currentRole !== 'gm') {
+                        document.getElementById("rest-shop-panel").classList.remove("hidden");
+                        renderShop();
+                    } else {
+                        document.getElementById("rest-shop-panel").classList.add("hidden");
+                    }
+                    document.getElementById("battle-display-group").classList.add("hidden");
+                    document.getElementById("rest-display-group").classList.remove("hidden");
                     document.getElementById("enemy-type-badge").innerText = "☕ 安全地帯";
+                    document.getElementById("enemy-name-display").innerText = "安全地帯";
                     document.getElementById("boss-status-text").innerText = "現在敵はいません。ショップを利用し準備完了してください。";
                     document.getElementById("battle-actions-section").classList.add("hidden");
                     document.getElementById("ready-action-section").classList.remove("hidden");
                     document.getElementById("ready-action-section").classList.add("flex");
                     if (stageMasterData[stage]?.rest) document.getElementById("suspicious-move-text").innerText = stageMasterData[stage].rest.suspicious;
                 } else {
+                    document.getElementById("enemy-status-panel").classList.remove("hidden");
+                    document.getElementById("rest-shop-panel").classList.add("hidden");
+                    document.getElementById("battle-display-group").classList.remove("hidden");
+                    document.getElementById("rest-display-group").classList.add("hidden");
                     document.getElementById("enemy-type-badge").innerText = phase === "boss" ? "👹 エリアボス" : "👾 襲撃モブ";
+                    document.getElementById("enemy-name-display").innerText = localGameState.enemyName || "---";
                     document.getElementById("boss-status-text").innerText = `「${localGameState.enemyName}」が立ちはだかっている！`;
                     document.getElementById("battle-actions-section").classList.remove("hidden");
                     document.getElementById("ready-action-section").classList.add("hidden");
@@ -647,7 +1001,16 @@
             badgesContainer.innerHTML = "";
             Object.entries(localGameState.players).forEach(([key, p]) => {
                 const span = document.createElement("span");
-                span.className = p.isReady ? "bg-indigo-900 text-indigo-300 px-1.5 py-0.5 rounded font-bold" : "bg-gray-800 text-gray-500 px-1.5 py-0.5 rounded";
+                span.className = "text-[10px] px-1.5 py-0.5 font-display font-bold border";
+                if (p.isReady) {
+                    span.style.background = "rgba(184,134,11,0.15)";
+                    span.style.color = "var(--metal-gold-bright)";
+                    span.style.borderColor = "var(--metal-gold)";
+                } else {
+                    span.style.background = "var(--well)";
+                    span.style.color = "var(--parchment-dim)";
+                    span.style.borderColor = "var(--stone-light)";
+                }
                 span.innerText = `${charData[key].name.split(' ')[1]}${p.isReady ? '✔' : '⏳'}`;
                 badgesContainer.appendChild(span);
             });
@@ -658,10 +1021,10 @@
                 const readyBtn = document.getElementById("btn-ready-toggle");
                 if (me.isReady) {
                     readyBtn.innerText = "準備を「一時解除」する";
-                    readyBtn.className = "bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-2 px-6 rounded-lg text-sm transition shadow-md w-full sm:w-auto";
+                    readyBtn.className = "iron-btn-emerald font-display font-bold py-2 px-6 text-sm w-full sm:w-auto";
                 } else {
                     readyBtn.innerText = "次の戦闘の準備を完了する";
-                    readyBtn.className = "bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-6 rounded-lg text-sm transition shadow-md w-full sm:w-auto";
+                    readyBtn.className = "iron-btn-indigo font-display font-bold py-2 px-6 text-sm w-full sm:w-auto";
                 }
 
                 // 必殺技ボタンの表示更新
@@ -675,10 +1038,10 @@
                     ultDesc.innerText = used ? "使用済み(この面では再使用不可)" : ult.desc;
                     if (used || phase === "rest" || stage === 6) {
                         ultBtn.disabled = true;
-                        ultBtn.className = "bg-gray-700 text-gray-500 font-bold p-3 rounded-lg text-sm border border-gray-600 cursor-not-allowed";
+                        ultBtn.className = "iron-btn font-display font-bold p-3 text-sm";
                     } else {
                         ultBtn.disabled = false;
-                        ultBtn.className = "bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-white font-bold p-3 rounded-lg text-sm transition shadow-sm";
+                        ultBtn.className = "iron-btn-gold font-display font-bold p-3 text-sm";
                     }
                 }
             }
@@ -699,15 +1062,9 @@
 
         window.showModalTab = (tab) => {
             currentModalTab = tab;
-            ["equip", "memo", "secret"].forEach(t => {
+            ["equip", "secret"].forEach(t => {
                 const btn = document.getElementById(`tab-btn-${t}`);
-                if (t === tab) {
-                    btn.classList.replace("bg-gray-700", "bg-indigo-600");
-                    btn.classList.replace("text-gray-300", "text-white");
-                } else {
-                    btn.classList.replace("bg-indigo-600", "bg-gray-700");
-                    btn.classList.replace("text-white", "text-gray-300");
-                }
+                btn.className = (t === tab) ? "flex-1 iron-btn-indigo py-1.5 text-xs font-display font-bold" : "flex-1 iron-btn py-1.5 text-xs font-display font-bold";
             });
             renderModalContent();
         };
@@ -728,40 +1085,50 @@
             content.innerHTML = "";
 
             if (currentModalTab === 'equip') {
-                content.innerHTML = `
-                    <h3 class="text-xs font-bold text-gray-400 mb-3 border-b border-gray-700 pb-1">🎒 所持品 ＆ 装備</h3>
+                const eq = me.equipment || {};
+                let equipmentHtml = `<h3 class="rune-heading rune-left text-xs font-display font-bold mb-3 border-b pb-1" style="border-color: var(--stone-light);">⚔ 部位別装備(戦利品)</h3>`;
+                equipmentHtml += `<div class="grid grid-cols-1 gap-2 mb-4">`;
+                Object.entries(equipmentSlots).forEach(([slotKey, slotInfo]) => {
+                    const item = eq[slotKey];
+                    if (item) {
+                        const el = elementData[item.element];
+                        equipmentHtml += `<div class="p-2 border flex justify-between items-center text-xs" style="background: var(--well); border-color: var(--metal-gold);">
+                            <span>${slotInfo.icon} ${slotInfo.name}</span>
+                            <span style="color: ${el.color};">${el.icon}${item.name} (ATK+${item.atkBonus})</span>
+                        </div>`;
+                    } else {
+                        equipmentHtml += `<div class="p-2 border flex justify-between items-center text-xs opacity-50" style="background: var(--well); border-color: var(--stone-light);">
+                            <span>${slotInfo.icon} ${slotInfo.name}</span>
+                            <span style="color: var(--parchment-dim);">未装備</span>
+                        </div>`;
+                    }
+                });
+                equipmentHtml += `</div>`;
+
+                content.innerHTML = equipmentHtml + `
+                    <h3 class="rune-heading rune-left text-xs font-display font-bold mb-3 border-b pb-1" style="border-color: var(--stone-light);">🎒 所持品 ＆ 装備</h3>
                     <div class="grid grid-cols-1 gap-2">
                         ${me.inventory ? me.inventory.map(item => {
                             const isEq = me.equipped === item;
+                            const isConsumable = commonShopItems.some(ci => ci.name === item);
                             return `
-                            <div class="bg-gray-900 p-3 rounded-lg border ${isEq ? 'border-amber-600' : 'border-gray-700'} flex justify-between items-center">
+                            <div class="p-3 border flex justify-between items-center" style="background: var(--well); border-color: ${isEq ? 'var(--metal-gold)' : 'var(--stone-light)'};">
                                 <div>
-                                    <p class="text-sm font-bold ${isEq ? 'text-amber-400' : 'text-gray-200'}">${item} ${isEq ? '<span class="text-[10px] bg-amber-900 text-amber-200 px-1 rounded ml-1">装備中</span>' : ''}</p>
+                                    <p class="text-sm font-display font-bold" style="color: ${isEq ? 'var(--metal-gold-bright)' : 'var(--parchment)'};">${item} ${isEq ? `<span class="text-[10px] px-1 ml-1" style="background: var(--metal-gold); color: var(--stone-dark);">装備中</span>` : ''}</p>
                                 </div>
-                                ${!isEq ? `<button onclick="equipItem('${item}')" class="bg-gray-700 hover:bg-gray-600 text-xs px-3 py-1.5 rounded transition">装備する</button>` : ''}
+                                ${!isEq && !isConsumable ? `<button onclick="equipItem('${item}')" class="iron-btn text-xs px-3 py-1.5">装備する</button>` : ''}
                             </div>
                             `;
-                        }).join('') : '<p class="text-gray-500 text-xs">アイテムを持っていません。</p>'}
+                        }).join('') : `<p class="text-xs" style="color: var(--parchment-dim);">アイテムを持っていません。</p>`}
                     </div>
                 `;
-            } else if (currentModalTab === 'memo') {
-                content.innerHTML = `
-                    <h3 class="text-xs font-bold text-gray-400 mb-3 border-b border-gray-700 pb-1">🤫 秘密の捜査メモ (自分のみ)</h3>
-                    <div class="flex gap-2 mb-4">
-                        <input type="text" id="modal-memo-input" placeholder="推理を入力..." class="flex-grow bg-gray-900 border border-gray-700 rounded px-2 text-xs text-white">
-                        <button onclick="addPersonalMemoModal()" class="bg-emerald-600 px-3 py-1.5 rounded text-xs font-bold">追加</button>
-                    </div>
-                    <div id="modal-memo-list" class="space-y-2 text-xs"></div>
-                `;
-                renderMemosModal();
-                document.getElementById("modal-memo-input").addEventListener("keydown", (e) => { if(e.key === "Enter") addPersonalMemoModal(); });
             } else if (currentModalTab === 'secret') {
                 content.innerHTML = `
-                    <h3 class="text-xs font-bold text-gray-400 mb-3 border-b border-gray-700 pb-1">📜 あなたが知る極秘情報</h3>
-                    <div class="bg-red-950/40 p-4 border border-red-900 rounded-lg text-red-200 text-xs leading-relaxed">
+                    <h3 class="rune-heading rune-left text-xs font-display font-bold mb-3 border-b pb-1" style="border-color: var(--stone-light);">📜 あなたが知る極秘情報</h3>
+                    <div class="p-4 border text-xs leading-relaxed" style="background: rgba(194,65,12,0.1); border-color: var(--ember); color: #e0b8a8;">
                         ${charData[currentRole].secret}
                     </div>
-                    <p class="text-[10px] text-gray-500 mt-2 text-center">※情報屋から買った情報もここに表示されます（現状は初期秘密のみ）</p>
+                    <p class="text-[10px] mt-2 text-center" style="color: var(--parchment-dim);">※情報屋から買った情報もここに表示されます（現状は初期秘密のみ）</p>
                 `;
             }
         }
@@ -771,39 +1138,157 @@
             let addedAtk = 0;
             if (itemName === "鋼鉄のブロードソード") addedAtk = 15;
             if (itemName === "魔王殺しのギガントアックス") addedAtk = 40;
-            const newAtk = me.baseAtk + addedAtk;
+            if (charData[currentRole].shopItem && charData[currentRole].shopItem.name === itemName) {
+                const m = (charData[currentRole].shopItem.desc || "").match(/攻撃力\+(\d+)/);
+                if (m) addedAtk = parseInt(m[1], 10);
+            }
+            // 戦利品装備(equipment)による合計ボーナスを加算
+            let equipmentBonus = 0;
+            if (me.equipment) {
+                Object.values(me.equipment).forEach(eq => { if (eq && eq.atkBonus) equipmentBonus += eq.atkBonus; });
+            }
+            const newAtk = me.baseAtk + addedAtk + equipmentBonus;
             update(ref(db, `gameState/players/${currentRole}`), { equipped: itemName, atk: newAtk });
             pushActionLog(charData[currentRole].name, `装備を「${itemName}」に変更した。`);
         };
 
-        // モーダル内のメモ機能
+        // 画面下部のメモ機能 (Firebaseに保存・複数端末で共有)
+        let localMemos = [];
+
         window.addPersonalMemoModal = function() {
-            const input = document.getElementById("modal-memo-input");
-            if (!input.value.trim()) return;
-            const storageKey = `rpg_mdms_memo_${currentRole}`;
-            const existingMemos = JSON.parse(localStorage.getItem(storageKey) || "[]");
-            existingMemos.push({ id: Date.now(), stage: `${localGameState.currentStage}面`, content: input.value.trim() });
-            localStorage.setItem(storageKey, JSON.stringify(existingMemos));
-            renderMemosModal();
+            const input = document.getElementById("bottom-memo-input");
+            if (!input.value.trim() || !currentRole || currentRole === 'gm') return;
+            push(ref(db, `personalMemos/${currentRole}`), { stage: `${localGameState.currentStage}面`, content: input.value.trim(), createdAt: Date.now() });
+            input.value = "";
         };
 
         window.deletePersonalMemoModal = function(id) {
-            const storageKey = `rpg_mdms_memo_${currentRole}`;
-            let existingMemos = JSON.parse(localStorage.getItem(storageKey) || "[]");
-            localStorage.setItem(storageKey, JSON.stringify(existingMemos.filter(m => m.id !== id)));
-            renderMemosModal();
+            if (!currentRole || currentRole === 'gm') return;
+            remove(ref(db, `personalMemos/${currentRole}/${id}`));
         };
 
+        function subscribeMemos(role) {
+            onValue(ref(db, `personalMemos/${role}`), (snapshot) => {
+                localMemos = [];
+                if (snapshot.exists()) {
+                    Object.entries(snapshot.val()).forEach(([id, m]) => {
+                        localMemos.push({ id, ...m });
+                    });
+                    localMemos.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+                }
+                renderMemosModal();
+            });
+        }
+
         function renderMemosModal() {
-            const container = document.getElementById("modal-memo-list");
-            if(!container) return;
-            const memos = JSON.parse(localStorage.getItem(`rpg_mdms_memo_${currentRole}`) || "[]");
-            container.innerHTML = memos.map(m => `
-                <div class="bg-gray-900 p-2 rounded flex justify-between border border-gray-700">
-                    <div><span class="text-[9px] bg-gray-800 text-gray-400 px-1 rounded mr-1">${m.stage}</span><span class="text-gray-200">${m.content}</span></div>
-                    <button onclick="deletePersonalMemoModal(${m.id})" class="text-gray-500 hover:text-red-400 px-1">✕</button>
+            const container = document.getElementById("bottom-memo-list");
+            if(!container || !currentRole || currentRole === 'gm') return;
+            container.innerHTML = localMemos.map(m => `
+                <div class="p-2 flex justify-between border" style="background: var(--well); border-color: var(--stone-light);">
+                    <div><span class="text-[9px] px-1 mr-1 border" style="background: var(--stone-panel); color: var(--parchment-dim); border-color: var(--stone-light);">${m.stage}</span><span style="color: var(--parchment);">${m.content}</span></div>
+                    <button onclick="deletePersonalMemoModal('${m.id}')" class="px-1" style="color: var(--parchment-dim);">✕</button>
                 </div>
-            `).join('') || '<p class="text-gray-500 italic text-center py-2">メモはありません。</p>';
+            `).join('') || `<p class="italic text-center py-2" style="color: var(--parchment-dim);">メモはありません。</p>`;
+        }
+
+        // ==========================================
+        // バトル演出エフェクト (斬撃・魔法陣)
+        // ==========================================
+        function triggerActionEffect(type, extra) {
+            const overlay = document.getElementById("effect-overlay");
+            if (!overlay) return;
+            overlay.innerHTML = "";
+
+            if (type === 'slash') {
+                const s1 = document.createElement("div");
+                s1.className = "effect-slash slash-1";
+                const s2 = document.createElement("div");
+                s2.className = "effect-slash slash-2";
+                overlay.appendChild(s1);
+                overlay.appendChild(s2);
+                setTimeout(() => { overlay.innerHTML = ""; }, 700);
+
+            } else if (type === 'slash-big') {
+                for (let i = 0; i < 4; i++) {
+                    const s = document.createElement("div");
+                    s.className = "effect-slash-big";
+                    s.style.top = `${30 + i * 10}%`;
+                    s.style.animationDelay = `${i * 0.08}s`;
+                    overlay.appendChild(s);
+                }
+                setTimeout(() => { overlay.innerHTML = ""; }, 900);
+
+            } else if (type === 'magic') {
+                overlay.innerHTML = `
+                    <svg class="effect-magic-circle" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="100" cy="100" r="90" fill="none" stroke="var(--metal-gold-bright)" stroke-width="2" opacity="0.8"/>
+                        <circle cx="100" cy="100" r="70" fill="none" stroke="#f6efdd" stroke-width="1.5" opacity="0.7"/>
+                        <circle cx="100" cy="100" r="50" fill="none" stroke="var(--metal-gold-bright)" stroke-width="1.5" opacity="0.6" stroke-dasharray="6 6"/>
+                        <path d="M100 10 L185 145 L15 145 Z" fill="none" stroke="#f6efdd" stroke-width="1.5" opacity="0.6"/>
+                        <path d="M100 190 L15 55 L185 55 Z" fill="none" stroke="var(--metal-gold-bright)" stroke-width="1.5" opacity="0.6"/>
+                        <circle cx="100" cy="100" r="6" fill="#f6efdd" opacity="0.9"/>
+                    </svg>
+                `;
+                setTimeout(() => { overlay.innerHTML = ""; }, 1000);
+
+            } else if (type === 'heal') {
+                overlay.innerHTML = `
+                    <svg class="effect-magic-circle" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="100" cy="100" r="90" fill="none" stroke="#9fd6b0" stroke-width="2" opacity="0.8"/>
+                        <circle cx="100" cy="100" r="65" fill="none" stroke="#f6efdd" stroke-width="1.5" opacity="0.7" stroke-dasharray="4 8"/>
+                        <path d="M100 40 L100 160 M40 100 L160 100" stroke="#9fd6b0" stroke-width="6" stroke-linecap="round" opacity="0.85"/>
+                        <circle cx="100" cy="100" r="40" fill="none" stroke="#f6efdd" stroke-width="1.5" opacity="0.6"/>
+                    </svg>
+                `;
+                setTimeout(() => { overlay.innerHTML = ""; }, 1000);
+
+            } else if (type === 'boss-entry') {
+                const flash = document.createElement("div");
+                flash.className = "effect-boss-flash";
+                overlay.appendChild(flash);
+
+                const banner = document.createElement("div");
+                banner.className = "effect-boss-banner";
+                banner.innerHTML = `<span>⚔ BOSS BATTLE ⚔</span>`;
+                overlay.appendChild(banner);
+
+                for (let i = 0; i < 5; i++) {
+                    const r = document.createElement("div");
+                    r.className = "effect-boss-ray";
+                    r.style.transform = `rotate(${i * 72}deg)`;
+                    r.style.animationDelay = `${i * 0.05}s`;
+                    overlay.appendChild(r);
+                }
+                setTimeout(() => { overlay.innerHTML = ""; }, 1800);
+
+            } else if (type === 'victory') {
+                const banner = document.createElement("div");
+                banner.className = "effect-victory-banner";
+                const goldAmount = extra && extra.gold ? extra.gold : 0;
+                banner.innerHTML = `<span>🏆 VICTORY 🏆</span>${goldAmount > 0 ? `<span class="effect-victory-gold">💰 全員 +${goldAmount} G 獲得！</span>` : ''}`;
+                overlay.appendChild(banner);
+
+                const colors = ['var(--metal-gold-bright)', 'var(--metal-gold)', '#f6efdd', 'var(--ember)'];
+                for (let i = 0; i < 28; i++) {
+                    const c = document.createElement("div");
+                    c.className = "effect-confetti";
+                    c.style.left = `${Math.random() * 100}%`;
+                    c.style.background = colors[i % colors.length];
+                    c.style.animationDelay = `${Math.random() * 0.6}s`;
+                    c.style.animationDuration = `${1.4 + Math.random() * 1.2}s`;
+                    c.style.setProperty('--rot', `${Math.random() * 720 - 360}deg`);
+                    overlay.appendChild(c);
+                }
+                for (let i = 0; i < 10; i++) {
+                    const g = document.createElement("div");
+                    g.className = "effect-gold-coin";
+                    g.innerText = "🪙";
+                    g.style.left = `${20 + Math.random() * 60}%`;
+                    g.style.animationDelay = `${0.2 + Math.random() * 0.5}s`;
+                    overlay.appendChild(g);
+                }
+                setTimeout(() => { overlay.innerHTML = ""; }, 2600);
+            }
         }
 
         // ==========================================
@@ -821,7 +1306,7 @@
                 const resetPlayers = {};
                 roles.forEach(r => resetPlayers[r] = { ...localGameState.players[r], isReady: false });
                 const nextData = stageMasterData[localGameState.currentStage].boss;
-                update(ref(db, 'gameState'), { currentPhase: "boss", enemyName: nextData.name, enemyHp: nextData.hp, enemyMaxHp: nextData.hp, players: resetPlayers });
+                update(ref(db, 'gameState'), { currentPhase: "boss", enemyName: nextData.name, enemyHp: nextData.hp, enemyMaxHp: nextData.hp, currentTurnIndex: 0, players: resetPlayers, effectTrigger: { id: `boss_entry_${Date.now()}`, type: 'boss-entry' } });
                 sendAnnouncement(`🚨 準備完了！ ボス「${nextData.name}」が出現！`);
             }
         }
@@ -838,6 +1323,7 @@
                 const isCrit = Math.random() < 0.20; 
                 if (isCrit) damage *= 2;
                 update(ref(db, `gameState/players/${currentRole}`), { sp: Math.min((pData.sp || 0) + 20, 100) });
+                triggerActionEffect(isCrit ? 'slash-big' : 'slash');
                 pushActionLog(charData[currentRole].name, isCrit ? `💥会心！【${damage}】ダメージ！` : `攻撃し【${damage}】ダメージ！`);
                 sendAnnouncement(isCrit ? `💥 ⚡CRITICAL⚡ ${charData[currentRole].name} の攻撃！ 【${damage}】ダメージ！` : `⚔️ ${charData[currentRole].name} の攻撃、${damage} ダメージ。`);
                 
@@ -848,6 +1334,7 @@
                 if ((pData.sp || 0) < 50) return alert("SPが50%未満です！");
                 damage = Math.floor(damage * 2.5);
                 update(ref(db, `gameState/players/${currentRole}`), { sp: (pData.sp || 0) - 50 });
+                triggerActionEffect('magic');
                 pushActionLog(charData[currentRole].name, `🔥 固有スキル！【${damage}】ダメージ！`);
                 sendAnnouncement(`🔥 ${charData[currentRole].name} の必殺スキル！ 【${damage}】 ダメージ！`);
                 
@@ -868,6 +1355,7 @@
                 if (ult.type === 'attack') {
                     const ultDamage = Math.floor(pData.atk * ult.multiplier);
                     update(ref(db, `gameState/players/${currentRole}`), { ultimateUsedStage: localGameState.currentStage });
+                    triggerActionEffect('slash-big');
                     pushActionLog(charData[currentRole].name, `💎 必殺技『${ult.name}』！【${ultDamage}】ダメージ！`);
                     sendAnnouncement(`💎 ${charData[currentRole].name} の必殺技『${ult.name}』！ 【${ultDamage}】 大ダメージ！`);
 
@@ -881,6 +1369,7 @@
                     });
                     uPlayers[currentRole].ultimateUsedStage = localGameState.currentStage;
                     update(ref(db, 'gameState/players'), uPlayers);
+                    triggerActionEffect('heal');
                     pushActionLog(charData[currentRole].name, `💎 必殺技『${ult.name}』！ 味方全員のHP・SPが全回復！`);
                     sendAnnouncement(`✨ ${charData[currentRole].name} の必殺技『${ult.name}』！ 味方全員が完全回復した！`);
 
@@ -893,9 +1382,16 @@
                     uPlayers[currentRole].ultimateUsedStage = localGameState.currentStage;
                     update(ref(db, 'gameState/players'), uPlayers);
                     update(ref(db, 'gameState'), { ultimateBuffActive: true });
+                    triggerActionEffect('magic');
                     pushActionLog(charData[currentRole].name, `💎 必殺技『${ult.name}』！ 味方全員の攻撃力が上昇！`);
                     sendAnnouncement(`🔮 ${charData[currentRole].name} の必殺技『${ult.name}』！ 味方全員の攻撃力が上昇した！`);
                 }
+            }
+
+            // 行動順を1つ進める
+            if (latestTurnOrder.length > 0) {
+                const nextIdx = ((localGameState.currentTurnIndex || 0) + 1) % latestTurnOrder.length;
+                update(ref(db, 'gameState'), { currentTurnIndex: nextIdx });
             }
         };
 
@@ -907,6 +1403,7 @@
             let gb = 0;
             if (phs === "mob_1") gb = stageMasterData[stg].mob_1.goldReward;
             else if (phs === "mob_2") gb = stageMasterData[stg].mob_2.goldReward;
+            else if (phs === "boss") gb = stageMasterData[stg].boss.goldReward || 0;
 
             const uPlayers = { ...localGameState.players };
             Object.keys(uPlayers).forEach(r => {
@@ -916,6 +1413,7 @@
             if(gb > 0) sendAnnouncement(`💰 敵を撃破！全員 【${gb} G】 獲得！`);
 
             let nextUltimateBuffActive = localGameState.ultimateBuffActive || false;
+            let effectTrigger = null;
 
             if (phs === "mob_1") {
                 nextPhs = "mob_2"; eName = stageMasterData[stg].mob_2.name; eHp = stageMasterData[stg].mob_2.hp;
@@ -932,6 +1430,13 @@
                 });
                 nextUltimateBuffActive = false;
             } else if (phs === "boss") {
+                // ボス撃破：全員のHP・SPを全回復
+                Object.keys(uPlayers).forEach(r => {
+                    uPlayers[r].hp = uPlayers[r].maxHp;
+                    uPlayers[r].sp = 100;
+                });
+                effectTrigger = { id: `victory_${Date.now()}`, type: 'victory', gold: gb };
+
                 if (stg === 5) { nextStg = 6; nextPhs = "mystery"; sendAnnouncement(`👑 大ボス討伐！ 魔王城の封印が解かれた！`); }
                 else { nextStg = stg + 1; nextPhs = "mob_1"; eName = stageMasterData[nextStg].mob_1.name; eHp = stageMasterData[nextStg].mob_1.hp; sendAnnouncement(`🎉 第${stg}面ボス撃破！ 次の面へ進軍！`); }
                 // ステージ進行時にも必殺技バフを解除
@@ -944,24 +1449,347 @@
                 nextUltimateBuffActive = false;
             }
 
-            set(ref(db, 'gameState'), { currentStage: nextStg, currentPhase: nextPhs, enemyName: eName, enemyHp: eHp, enemyMaxHp: eHp, rescueBuffActive: localGameState.rescueBuffActive, ultimateBuffActive: nextUltimateBuffActive, deviceResetCounter: localGameState.deviceResetCounter || 0, players: uPlayers });
+            const updateData = { currentStage: nextStg, currentPhase: nextPhs, enemyName: eName, enemyHp: eHp, enemyMaxHp: eHp, rescueBuffActive: localGameState.rescueBuffActive, ultimateBuffActive: nextUltimateBuffActive, deviceResetCounter: localGameState.deviceResetCounter || 0, currentTurnIndex: 0, players: uPlayers };
+            if (effectTrigger) updateData.effectTrigger = effectTrigger;
+
+            // 戦利品分配フェーズを開始 (魔王城突入時は除く)
+            if (nextPhs !== "mystery") {
+                updateData.lootPhase = {
+                    active: true,
+                    tier: phs === "boss" ? "boss" : "mob",
+                    step: "voting",
+                    votes: {},
+                    diceRolls: {},
+                    order: [],
+                    currentPickerIndex: 0,
+                    pickedSlots: {},
+                    picks: {}
+                };
+            }
+
+            set(ref(db, 'gameState'), updateData);
         }
 
-        window.buyItem = function(itemType, cost) {
+        // ==========================================
+        // 戦利品分配フェーズ (ヒーロー投票 → 部位選択 → 属性選択)
+        // ==========================================
+        const playerRoles = ['ninja', 'demon', 'priest_bro', 'priest_sis'];
+
+        window.castVote = function(targetRole) {
+            if (!currentRole || currentRole === 'gm') return;
+            const lp = localGameState.lootPhase;
+            if (!lp || lp.step !== 'voting') return;
+            update(ref(db, 'gameState/lootPhase/votes'), { [currentRole]: targetRole });
+        };
+
+        window.rollDiceForLoot = function() {
+            if (!currentRole || currentRole === 'gm') return;
+            const lp = localGameState.lootPhase;
+            if (!lp || lp.step !== 'dice') return;
+            if (lp.diceRolls && lp.diceRolls[currentRole] !== undefined) return;
+            const roll = Math.floor(Math.random() * 6) + 1;
+            update(ref(db, 'gameState/lootPhase/diceRolls'), { [currentRole]: roll });
+        };
+
+        window.pickLootSlot = function(slot) {
+            if (!currentRole || currentRole === 'gm') return;
+            const lp = localGameState.lootPhase;
+            if (!lp || lp.step !== 'picking') return;
+            if (lp.order[lp.currentPickerIndex] !== currentRole) return;
+            if (lp.pickedSlots && lp.pickedSlots[slot]) return;
+
+            const pickedSlots = { ...(lp.pickedSlots || {}), [slot]: currentRole };
+            const picks = { ...(lp.picks || {}) };
+            picks[currentRole] = { slot: slot, element: null };
+            update(ref(db, 'gameState/lootPhase'), { pickedSlots, picks });
+        };
+
+        window.pickLootElement = function(elementKey) {
+            if (!currentRole || currentRole === 'gm') return;
+            const lp = localGameState.lootPhase;
+            if (!lp || lp.step !== 'picking') return;
+            if (lp.order[lp.currentPickerIndex] !== currentRole) return;
+            const myPick = lp.picks && lp.picks[currentRole];
+            if (!myPick || myPick.element) return;
+
+            const slot = myPick.slot;
+            const itemName = buildLootItemName(slot, elementKey);
+            const tier = lp.tier;
+            const atkBonus = lootItemTemplates[slot].atkBonus[tier];
+
+            // 装備とインベントリに反映
+            const pData = localGameState.players[currentRole];
+            const newEquipment = { ...(pData.equipment || {}), [slot]: { name: itemName, element: elementKey, atkBonus: atkBonus, tier: tier } };
+            const newInventory = [...(pData.inventory || []), itemName];
+
+            // 攻撃力に反映 (旧装備のボーナスを引いて新しいものを足す)
+            const oldBonus = (pData.equipment && pData.equipment[slot] && pData.equipment[slot].atkBonus) || 0;
+            const newAtk = (pData.atk || pData.baseAtk) - oldBonus + atkBonus;
+
+            update(ref(db, `gameState/players/${currentRole}`), { equipment: newEquipment, inventory: newInventory, atk: newAtk });
+
+            const picks = { ...(lp.picks || {}) };
+            picks[currentRole] = { slot: slot, element: elementKey };
+
+            // 次のピッカーへ
+            const nextIndex = lp.currentPickerIndex + 1;
+            const updateData = { picks };
+            pushActionLog(charData[currentRole].name, `戦利品として「${itemName}」(${equipmentSlots[slot].name})を手に入れた！`);
+            sendAnnouncement(`🎁 ${charData[currentRole].name} が「${itemName}」を獲得した！`);
+
+            if (nextIndex >= lp.order.length) {
+                updateData.step = 'done';
+            } else {
+                updateData.currentPickerIndex = nextIndex;
+            }
+            update(ref(db, 'gameState/lootPhase'), updateData);
+        };
+
+        window.closeLootPhase = function() {
+            update(ref(db, 'gameState'), { lootPhase: { active: false } });
+        };
+
+        window.gmAdvanceLootPhase = function() {
+            // GM用：投票締め切り → 集計 → サイコロ or 順位確定
+            const lp = localGameState.lootPhase;
+            if (!lp) return;
+
+            if (lp.step === 'voting') {
+                const votes = lp.votes || {};
+                const tally = {};
+                playerRoles.forEach(r => tally[r] = 0);
+                Object.values(votes).forEach(v => { if (tally[v] !== undefined) tally[v]++; });
+
+                const maxVotes = Math.max(...Object.values(tally));
+                const tied = playerRoles.filter(r => tally[r] === maxVotes);
+
+                if (tied.length > 1) {
+                    // 同数 → サイコロへ
+                    update(ref(db, 'gameState/lootPhase'), { step: 'dice', tally, tiedRoles: tied });
+                } else {
+                    // 確定：MVPを先頭に、残りはAGI順などで決定
+                    const rest = playerRoles.filter(r => r !== tied[0]).sort((a, b) => (localGameState.players[b].agi || 0) - (localGameState.players[a].agi || 0));
+                    const order = [tied[0], ...rest];
+                    update(ref(db, 'gameState/lootPhase'), { step: 'picking', order, tally, currentPickerIndex: 0 });
+                }
+            } else if (lp.step === 'dice') {
+                const rolls = lp.diceRolls || {};
+                const tiedRoles = lp.tiedRoles || playerRoles;
+                if (tiedRoles.some(r => rolls[r] === undefined)) return; // 全員ロール待ち
+
+                const sortedTied = [...tiedRoles].sort((a, b) => (rolls[b] || 0) - (rolls[a] || 0));
+                const rest = playerRoles.filter(r => !tiedRoles.includes(r)).sort((a, b) => (localGameState.players[b].agi || 0) - (localGameState.players[a].agi || 0));
+                const order = [...sortedTied, ...rest];
+                update(ref(db, 'gameState/lootPhase'), { step: 'picking', order, currentPickerIndex: 0 });
+            }
+        };
+
+        function renderLootPhase() {
+            const modal = document.getElementById("loot-phase-modal");
+            const content = document.getElementById("loot-phase-content");
+            const titleEl = document.getElementById("loot-phase-title");
+            if (!modal || !content) return;
+
+            const lp = localGameState.lootPhase;
+            if (!lp || !lp.active) {
+                modal.classList.add("hidden");
+                return;
+            }
+            modal.classList.remove("hidden");
+
+            const tierLabel = lp.tier === 'boss' ? 'ボス' : 'モブ';
+            titleEl.innerText = `戦利品の分配 (${tierLabel}戦勝利)`;
+
+            let html = '';
+
+            if (lp.step === 'voting') {
+                const votes = lp.votes || {};
+                const myVote = currentRole && currentRole !== 'gm' ? votes[currentRole] : null;
+                html += `<p class="mb-3" style="color: var(--parchment-dim);">最も活躍したと思うプレイヤーに投票してください。(自分にも投票できます)</p>`;
+                html += `<div class="grid grid-cols-2 gap-3 mb-4">`;
+                playerRoles.forEach(r => {
+                    const isMine = myVote === r;
+                    html += `<button onclick="castVote('${r}')" class="${isMine ? 'iron-btn-gold' : 'iron-btn'} p-3 font-display font-bold text-sm" ${currentRole === 'gm' ? 'disabled' : ''}>${charData[r].icon} ${charData[r].name.split(' ')[1]}</button>`;
+                });
+                html += `</div>`;
+
+                // 投票状況の明示
+                html += `<div class="p-3 border mb-3" style="background: var(--well); border-color: var(--stone-light);">`;
+                html += `<h4 class="text-xs font-display font-bold mb-2" style="color: var(--metal-gold-bright);">投票状況</h4>`;
+                playerRoles.forEach(r => {
+                    const v = votes[r];
+                    html += `<div class="text-xs flex justify-between py-0.5"><span>${charData[r].icon} ${charData[r].name.split(' ')[1]}</span><span style="color: var(--parchment-dim);">${v ? `→ ${charData[v].icon} ${charData[v].name.split(' ')[1]} に投票` : '未投票'}</span></div>`;
+                });
+                html += `</div>`;
+
+                if (currentRole === 'gm') {
+                    const allVoted = playerRoles.every(r => votes[r]);
+                    html += `<button onclick="gmAdvanceLootPhase()" class="iron-btn-indigo w-full p-2 font-display font-bold text-sm" ${allVoted ? '' : 'disabled'}>${allVoted ? '集計して次へ進む' : '全員の投票を待っています...'}</button>`;
+                }
+
+            } else if (lp.step === 'dice') {
+                const rolls = lp.diceRolls || {};
+                const tiedRoles = lp.tiedRoles || [];
+                html += `<p class="mb-3" style="color: var(--parchment-dim);">投票が同数でした！ サイコロを振って順位を決定します。</p>`;
+                html += `<div class="grid grid-cols-2 gap-3 mb-4">`;
+                tiedRoles.forEach(r => {
+                    const rolled = rolls[r];
+                    html += `<div class="p-3 border text-center" style="background: var(--well); border-color: var(--stone-light);">
+                        <div class="text-xs font-display font-bold mb-1">${charData[r].icon} ${charData[r].name.split(' ')[1]}</div>
+                        <div class="text-2xl font-display font-bold" style="color: var(--metal-gold-bright);">${rolled !== undefined ? `🎲 ${rolled}` : '-'}</div>
+                        ${(r === currentRole && rolled === undefined) ? `<button onclick="rollDiceForLoot()" class="iron-btn-gold text-xs mt-2 px-3 py-1">サイコロを振る</button>` : ''}
+                    </div>`;
+                });
+                html += `</div>`;
+
+                if (currentRole === 'gm') {
+                    const allRolled = tiedRoles.every(r => rolls[r] !== undefined);
+                    html += `<button onclick="gmAdvanceLootPhase()" class="iron-btn-indigo w-full p-2 font-display font-bold text-sm" ${allRolled ? '' : 'disabled'}>${allRolled ? '順位を確定して次へ進む' : '全員のサイコロを待っています...'}</button>`;
+                }
+
+            } else if (lp.step === 'picking') {
+                const order = lp.order || [];
+                const curRole = order[lp.currentPickerIndex];
+                const pickedSlots = lp.pickedSlots || {};
+                const picks = lp.picks || {};
+
+                html += `<div class="p-3 border mb-3" style="background: var(--well); border-color: var(--metal-gold);">`;
+                html += `<h4 class="text-xs font-display font-bold mb-2" style="color: var(--metal-gold-bright);">選択順</h4>`;
+                html += `<div class="flex flex-wrap gap-2">`;
+                order.forEach((r, i) => {
+                    const done = picks[r] && picks[r].element;
+                    const isCurrent = i === lp.currentPickerIndex;
+                    html += `<span class="text-xs px-2 py-1 border font-display font-bold" style="${isCurrent ? 'background: rgba(184,134,11,0.2); border-color: var(--metal-gold); color: var(--metal-gold-bright);' : 'background: var(--stone-panel); border-color: var(--stone-light); color: var(--parchment-dim);'}">${i + 1}. ${charData[r].icon}${charData[r].name.split(' ')[1]}${done ? ' ✓' : ''}</span>`;
+                });
+                html += `</div></div>`;
+
+                if (!curRole) {
+                    html += `<p style="color: var(--parchment-dim);">エラー：選択順が正しく設定されていません。</p>`;
+                } else {
+                    const curPick = picks[curRole];
+
+                    if (!curPick || !curPick.slot) {
+                        // 部位選択
+                        html += `<p class="mb-3 font-display font-bold" style="color: var(--metal-gold-bright);">${charData[curRole].icon} ${charData[curRole].name.split(' ')[1]} の番です：部位を選んでください</p>`;
+                        html += `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">`;
+                        Object.entries(equipmentSlots).forEach(([slotKey, slotInfo]) => {
+                            const taken = pickedSlots[slotKey];
+                            const canPick = currentRole === curRole && !taken;
+                            html += `<button onclick="pickLootSlot('${slotKey}')" class="${taken ? 'iron-btn' : 'iron-btn-gold'} p-3 font-display font-bold text-sm" ${canPick ? '' : 'disabled'}>
+                                ${slotInfo.icon} ${slotInfo.name} ${taken ? `<span class="block text-[10px] opacity-70 mt-1">${charData[taken].icon}${charData[taken].name.split(' ')[1]} が選択済</span>` : ''}
+                            </button>`;
+                        });
+                        html += `</div>`;
+                        if (currentRole !== curRole) {
+                            html += `<p class="text-xs mt-3 text-center" style="color: var(--parchment-dim);">${charData[curRole].name.split(' ')[1]}の選択を待っています...</p>`;
+                        }
+
+                    } else if (!curPick.element) {
+                        // 属性選択
+                        html += `<p class="mb-3 font-display font-bold" style="color: var(--metal-gold-bright);">${charData[curRole].icon} ${charData[curRole].name.split(' ')[1]} の番です：「${equipmentSlots[curPick.slot].name}」の属性を選んでください</p>`;
+                        html += `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">`;
+                        Object.entries(elementData).forEach(([elKey, elInfo]) => {
+                            const canPick = currentRole === curRole;
+                            html += `<button onclick="pickLootElement('${elKey}')" class="iron-btn-gold p-3 font-display font-bold text-sm" ${canPick ? '' : 'disabled'} style="color: ${elInfo.color};">
+                                ${elInfo.icon} ${elInfo.name}属性
+                            </button>`;
+                        });
+                        html += `</div>`;
+                        if (currentRole !== curRole) {
+                            html += `<p class="text-xs mt-3 text-center" style="color: var(--parchment-dim);">${charData[curRole].name.split(' ')[1]}の選択を待っています...</p>`;
+                        }
+                    }
+                }
+
+                // 確定済みの戦利品一覧
+                const doneEntries = Object.entries(picks).filter(([r, p]) => p.element);
+                if (doneEntries.length > 0) {
+                    html += `<div class="p-3 border mt-4" style="background: var(--well); border-color: var(--stone-light);">`;
+                    html += `<h4 class="text-xs font-display font-bold mb-2" style="color: var(--metal-gold-bright);">確定済みの戦利品</h4>`;
+                    doneEntries.forEach(([r, p]) => {
+                        const el = elementData[p.element];
+                        html += `<div class="text-xs py-0.5" style="color: var(--parchment);">${charData[r].icon} ${charData[r].name.split(' ')[1]}： ${buildLootItemName(p.slot, p.element)}</div>`;
+                    });
+                    html += `</div>`;
+                }
+
+            } else if (lp.step === 'done') {
+                html += `<p class="mb-3 font-display font-bold text-center" style="color: var(--metal-gold-bright);">🎉 戦利品の分配が完了しました！</p>`;
+                const picks = lp.picks || {};
+                html += `<div class="p-3 border mb-3" style="background: var(--well); border-color: var(--stone-light);">`;
+                Object.entries(picks).forEach(([r, p]) => {
+                    if (!p.element) return;
+                    html += `<div class="text-sm py-1" style="color: var(--parchment);">${charData[r].icon} ${charData[r].name.split(' ')[1]}： <span style="color: var(--metal-gold-bright);">${buildLootItemName(p.slot, p.element)}</span> (${equipmentSlots[p.slot].name})</div>`;
+                });
+                html += `</div>`;
+                html += `<button onclick="closeLootPhase()" class="iron-btn-indigo w-full p-2 font-display font-bold text-sm">閉じる</button>`;
+            }
+
+            content.innerHTML = html;
+        }
+
+        function renderShop() {
+            const grid = document.getElementById("shop-item-grid");
+            if (!grid || !currentRole || currentRole === 'gm') return;
+            const pData = localGameState.players[currentRole];
+            const myShopItem = charData[currentRole].shopItem;
+            const inv = pData.inventory || [];
+
+            let html = '';
+
+            if (myShopItem) {
+                const owned = inv.includes(myShopItem.name);
+                html += `
+                    <div class="p-3 border flex flex-col justify-between" style="background: var(--well); border-color: var(--metal-gold);">
+                        <div>
+                            <span class="text-[9px] px-1.5 py-0.5" style="background: rgba(184,134,11,0.2); color: var(--metal-gold-bright);">あなた専用装備</span>
+                            <h4 class="font-display font-bold text-xs mt-1" style="color: var(--parchment);">${myShopItem.name}</h4>
+                            <p class="text-[10px]" style="color: var(--parchment-dim);">${myShopItem.desc}</p>
+                        </div>
+                        ${owned
+                            ? `<div class="mt-2 w-full iron-btn text-xs font-display font-bold py-1 px-2 text-center">購入済み</div>`
+                            : `<button onclick="buyItem('${myShopItem.id}', ${myShopItem.cost})" class="mt-2 w-full iron-btn-gold text-xs font-display font-bold py-1 px-2 flex justify-between"><span>購入</span><span>${myShopItem.cost} G</span></button>`
+                        }
+                    </div>`;
+            }
+
+            commonShopItems.forEach(item => {
+                html += `
+                    <div class="p-3 border flex flex-col justify-between" style="background: var(--well); border-color: var(--stone-light);">
+                        <div>
+                            <span class="text-[9px] px-1.5 py-0.5" style="background: var(--stone-panel); color: var(--parchment-dim);">共通アイテム</span>
+                            <h4 class="font-display font-bold text-xs mt-1" style="color: var(--parchment);">${item.name}</h4>
+                            <p class="text-[10px]" style="color: var(--parchment-dim);">${item.desc}</p>
+                        </div>
+                        <button onclick="buyItem('${item.id}', ${item.cost})" class="mt-2 w-full iron-btn-indigo text-xs font-display font-bold py-1 px-2 flex justify-between"><span>購入</span><span>${item.cost} G</span></button>
+                    </div>`;
+            });
+
+            grid.innerHTML = html;
+        }
+
+        window.buyItem = function(itemId, cost) {
             const pData = localGameState.players[currentRole];
             if (pData.gold < cost) return alert("G不足！");
             let inv = pData.inventory ? [...pData.inventory] : [];
-            if (itemType === 'iron_sword' || itemType === 'giant_axe') {
-                const n = itemType === 'iron_sword' ? "鋼鉄のブロードソード" : "魔王殺しのギガントアックス";
-                inv.push(n);
-                update(ref(db, `gameState/players/${currentRole}`), { gold: pData.gold - cost, inventory: inv });
-                pushActionLog(charData[currentRole].name, `「${n}」を購入。`);
-                alert(`購入完了！左上の「⚙️メニュー」から装備を変更してください。`);
-            } else if (itemType === 'info') {
-                update(ref(db, `gameState/players/${currentRole}`), { gold: pData.gold - cost });
-                sendAnnouncement(`🛒 【密告】${charData[currentRole].name} が商人と裏取引を行った。`);
-                alert("極秘情報を入手しました。左上の「⚙️メニュー」→「極秘書類」を確認してください。");
+
+            const myShopItem = charData[currentRole].shopItem;
+            const commonItem = commonShopItems.find(i => i.id === itemId);
+
+            let itemName = "";
+            if (myShopItem && myShopItem.id === itemId) {
+                itemName = myShopItem.name;
+                inv.push(itemName);
+            } else if (commonItem) {
+                itemName = commonItem.name;
+                inv.push(itemName);
+            } else {
+                return;
             }
+
+            update(ref(db, `gameState/players/${currentRole}`), { gold: pData.gold - cost, inventory: inv });
+            pushActionLog(charData[currentRole].name, `商人から「${itemName}」を購入した。`);
+            renderShop();
         };
 
         window.changeStageAndPhase = (s, p) => {
