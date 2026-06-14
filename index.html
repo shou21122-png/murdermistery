@@ -523,6 +523,11 @@
                     <button onclick="advanceToNextPhase()" class="iron-btn-emerald w-full text-xs font-display font-bold p-2 mb-1">▶ 次のフェーズへ進む</button>
                     <p class="text-[10px] text-center" style="color: var(--parchment-dim);">現在: <span id="gm-current-phase-label">-</span> → 次: <span id="gm-next-phase-label">-</span></p>
                 </div>
+                <div id="gm-vote-status-panel" class="hidden p-3 border" style="background: var(--well); border-color: var(--metal-gold);">
+                    <label class="block text-xs font-display font-bold mb-2" style="color: var(--metal-gold-bright);">🗳 ヒーロー投票 進行中</label>
+                    <div id="gm-vote-status-list" class="text-xs space-y-0.5 mb-2"></div>
+                    <button onclick="gmAdvanceLootPhase()" id="gm-vote-advance-btn" class="iron-btn-indigo w-full text-xs font-display font-bold p-2">集計して次へ進む</button>
+                </div>
                 <div class="p-3 border" style="background: var(--well); border-color: var(--stone-light);">
                     <label class="block text-xs font-display font-bold mb-2" style="color: var(--metal-silver);">ステージ強制移動</label>
                     <div class="flex flex-col gap-1.5" id="gm-stage-jump-buttons"></div>
@@ -880,6 +885,9 @@
 
             document.getElementById("current-stage-display").innerText = stage === 6 ? "第6面：最終章" : `第${stage}面`;
             let phaseText = { "mob_1": "前哨戦1", "mob_2": "前哨戦2", "rest": "休憩所", "boss": "エリアボス", "mystery": "最終議論" }[phase] || "不明";
+            if (localGameState.lootPhase && localGameState.lootPhase.active && localGameState.lootPhase.step === 'voting') {
+                phaseText = "🗳 投票中";
+            }
             document.getElementById("current-phase-display").innerText = phaseText;
 
             // --- GM進行操作パネルの更新 ---
@@ -896,6 +904,27 @@
             }
 
             renderLootPhase();
+
+            // --- GM用：投票状況パネルの更新 ---
+            const gmVotePanel = document.getElementById("gm-vote-status-panel");
+            if (gmVotePanel) {
+                const lp = localGameState.lootPhase;
+                if (currentRole === 'gm' && lp && lp.active && lp.step === 'voting') {
+                    gmVotePanel.classList.remove("hidden");
+                    const votes = lp.votes || {};
+                    const list = document.getElementById("gm-vote-status-list");
+                    list.innerHTML = playerRoles.map(r => {
+                        const v = votes[r];
+                        return `<div class="flex justify-between"><span>${charData[r].icon} ${charData[r].name.split(' ')[1]}</span><span style="color: var(--parchment-dim);">${v ? `→ ${charData[v].icon} ${charData[v].name.split(' ')[1]}` : '未投票'}</span></div>`;
+                    }).join('');
+                    const allVoted = playerRoles.every(r => votes[r]);
+                    const advBtn = document.getElementById("gm-vote-advance-btn");
+                    advBtn.disabled = !allVoted;
+                    advBtn.innerText = allVoted ? '集計して次へ進む' : '全員の投票を待っています...';
+                } else {
+                    gmVotePanel.classList.add("hidden");
+                }
+            }
 
             // --- パーティ一覧のレンダリング (共有画面の左側) ---
             const partyContainer = document.getElementById("party-list-container");
@@ -1609,6 +1638,13 @@
                 modal.classList.add("hidden");
                 return;
             }
+
+            // GMは投票中、画面を占有させずに進行欄で通知する
+            if (currentRole === 'gm' && lp.step === 'voting') {
+                modal.classList.add("hidden");
+                return;
+            }
+
             modal.classList.remove("hidden");
 
             const tierLabel = lp.tier === 'boss' ? 'ボス' : 'モブ';
