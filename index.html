@@ -519,13 +519,13 @@
                     <button onclick="triggerWipeRescue()" class="iron-btn-crimson text-xs font-display font-bold py-2 px-4">全滅救済（HP/SP MAX＆バフ）</button>
                 </div>
                 <div class="p-3 border" style="background: var(--well); border-color: var(--stone-light);">
+                    <label class="block text-xs font-display font-bold mb-2" style="color: var(--metal-silver);">進行操作</label>
+                    <button onclick="advanceToNextPhase()" class="iron-btn-emerald w-full text-xs font-display font-bold p-2 mb-1">▶ 次のフェーズへ進む</button>
+                    <p class="text-[10px] text-center" style="color: var(--parchment-dim);">現在: <span id="gm-current-phase-label">-</span> → 次: <span id="gm-next-phase-label">-</span></p>
+                </div>
+                <div class="p-3 border" style="background: var(--well); border-color: var(--stone-light);">
                     <label class="block text-xs font-display font-bold mb-2" style="color: var(--metal-silver);">ステージ強制移動</label>
-                    <div class="flex flex-wrap gap-2">
-                        <button onclick="changeStageAndPhase(1, 'mob_1')" class="iron-btn text-[10px] p-1.5">1面:モブ1</button>
-                        <button onclick="changeStageAndPhase(1, 'rest')" class="iron-btn text-[10px] p-1.5">1面:休憩</button>
-                        <button onclick="changeStageAndPhase(5, 'boss')" class="iron-btn-gold text-[10px] p-1.5">5面:大ボス</button>
-                        <button onclick="changeStageAndPhase(6, 'mystery')" class="iron-btn-crimson font-bold text-[10px] p-1.5">6面:マダミス</button>
-                    </div>
+                    <div class="flex flex-col gap-1.5" id="gm-stage-jump-buttons"></div>
                 </div>
                 <div class="p-3 border" style="background: var(--well); border-color: var(--stone-light);">
                     <h3 class="text-xs font-display font-bold mb-1" style="color: var(--metal-gold-bright);">🤫 リアルタイム全ログ監視 ＆ 抹消</h3>
@@ -694,6 +694,7 @@
         let currentModalTab = 'equip';
         let lastSeenEffectId = null;
         let memosSubscribed = false;
+        let gmStageJumpRendered = false;
 
         // 🔄 Firebaseデータベース購読・初期化
         onValue(ref(db, 'gameState'), (snapshot) => {
@@ -880,6 +881,19 @@
             document.getElementById("current-stage-display").innerText = stage === 6 ? "第6面：最終章" : `第${stage}面`;
             let phaseText = { "mob_1": "前哨戦1", "mob_2": "前哨戦2", "rest": "休憩所", "boss": "エリアボス", "mystery": "最終議論" }[phase] || "不明";
             document.getElementById("current-phase-display").innerText = phaseText;
+
+            // --- GM進行操作パネルの更新 ---
+            const gmCurLabel = document.getElementById("gm-current-phase-label");
+            const gmNextLabel = document.getElementById("gm-next-phase-label");
+            if (gmCurLabel && gmNextLabel) {
+                gmCurLabel.innerText = `${stage}面-${phaseLabel[phase] || phase}`;
+                const next = getNextStagePhase(stage, phase);
+                gmNextLabel.innerText = next ? `${next.stage}面-${phaseLabel[next.phase]}` : "（最終フェーズ）";
+                if (!gmStageJumpRendered) {
+                    renderGmStageJumpButtons();
+                    gmStageJumpRendered = true;
+                }
+            }
 
             renderLootPhase();
 
@@ -1792,10 +1806,64 @@
             renderShop();
         };
 
+        // フェーズ進行順序の定義
+        const phaseOrder = ['mob_1', 'mob_2', 'rest', 'boss'];
+        const phaseLabel = { mob_1: "モブ1", mob_2: "モブ2", rest: "休憩", boss: "ボス", mystery: "マダミス" };
+
+        function getEnemyDataForPhase(stage, phase) {
+            if (phase === 'rest') return { name: "安全地帯", hp: 0 };
+            if (phase === 'mystery') return { name: "マダミス議論", hp: 0 };
+            return stageMasterData[stage][phase];
+        }
+
         window.changeStageAndPhase = (s, p) => {
-            const data = p === 'rest' || p === 'mystery' ? { name: p==='rest'?"安全地帯":"マダミス議論", hp:0 } : stageMasterData[s][p];
-            update(ref(db, 'gameState'), { currentStage: s, currentPhase: p, enemyName: data.name, enemyHp: data.hp, enemyMaxHp: data.hp });
+            const data = getEnemyDataForPhase(s, p);
+            const updateData = { currentStage: s, currentPhase: p, enemyName: data.name, enemyHp: data.hp, enemyMaxHp: data.hp, currentTurnIndex: 0, lootPhase: { active: false } };
+            // 休憩フェーズに移行する場合はisReadyをリセット
+            if (p === 'rest' && localGameState.players) {
+                const resetPlayers = {};
+                Object.entries(localGameState.players).forEach(([k, d]) => resetPlayers[k] = { ...d, isReady: false });
+                updateData.players = resetPlayers;
+            }
+            update(ref(db, 'gameState'), updateData);
         };
+
+        // 次のフェーズを計算 (現在のステージ/フェーズから)
+        function getNextStagePhase(stage, phase) {
+            if (phase === 'mystery') return null; // 最終フェーズ
+            const idx = phaseOrder.indexOf(phase);
+            if (idx === -1) return null;
+            if (idx < phaseOrder.length - 1) {
+                return { stage: stage, phase: phaseOrder[idx + 1] };
+            }
+            // ボスの次：次のステージのモブ1、または6面マダミス
+            if (stage >= 5) return { stage: 6, phase: 'mystery' };
+            return { stage: stage + 1, phase: 'mob_1' };
+        }
+
+        window.advanceToNextPhase = () => {
+            if (!localGameState.currentStage || !localGameState.currentPhase) return;
+            const next = getNextStagePhase(localGameState.currentStage, localGameState.currentPhase);
+            if (!next) return;
+            window.changeStageAndPhase(next.stage, next.phase);
+        };
+
+        function renderGmStageJumpButtons() {
+            const container = document.getElementById("gm-stage-jump-buttons");
+            if (!container) return;
+            let html = '';
+            for (let s = 1; s <= 5; s++) {
+                html += `<div class="flex gap-1.5 flex-wrap">`;
+                html += `<span class="text-[10px] font-display font-bold self-center px-1" style="color: var(--metal-gold-bright);">${s}面:</span>`;
+                phaseOrder.forEach(p => {
+                    const cls = p === 'boss' ? 'iron-btn-gold' : 'iron-btn';
+                    html += `<button onclick="changeStageAndPhase(${s}, '${p}')" class="${cls} text-[10px] p-1.5 flex-1">${phaseLabel[p]}</button>`;
+                });
+                html += `</div>`;
+            }
+            html += `<button onclick="changeStageAndPhase(6, 'mystery')" class="iron-btn-crimson font-bold text-[10px] p-1.5">6面:マダミス（最終議論）</button>`;
+            container.innerHTML = html;
+        }
 
         window.triggerWipeRescue = () => {
             const uP = {}; Object.entries(localGameState.players).forEach(([k, d]) => uP[k] = { ...d, hp: d.maxHp, sp: 100 });
