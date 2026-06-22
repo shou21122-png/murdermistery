@@ -426,16 +426,23 @@
                     </div>
                 </div>
 
-                <div id="enemy-status-panel" class="w-full lg:w-56 flex-shrink-0 stone-corners p-4 flex flex-col gap-2 shadow-lg h-full border-2" style="border-color: var(--ember); background: var(--stone-panel);">
-                    <div class="flex items-center justify-between">
-                        <span id="enemy-type-badge" class="text-[10px] px-2 py-0.5 font-bold border" style="background: var(--well); color: var(--ember-bright); border-color: var(--ember);">👾 襲撃モブ</span>
+                <div id="enemy-status-panel" class="w-full lg:w-56 flex-shrink-0 stone-corners flex flex-col shadow-lg h-full border-2" style="border-color: var(--ember); background: var(--stone-panel);">
+                    <div class="p-3 flex flex-col gap-2 border-b" style="border-color: var(--stone-light);">
+                        <div class="flex items-center justify-between">
+                            <span id="enemy-type-badge" class="text-[10px] px-2 py-0.5 font-bold border" style="background: var(--well); color: var(--ember-bright); border-color: var(--ember);">👾 襲撃モブ</span>
+                            <span id="enemy-element-badge" class="text-[10px] px-2 py-0.5 font-bold border"></span>
+                        </div>
+                        <div class="text-sm font-display font-bold" style="color: var(--ember-bright);" id="enemy-name-display">---</div>
+                        <div class="w-full h-4 overflow-hidden relative gauge-track">
+                            <div id="boss-hp-bar" class="gauge-fill-enemy h-full" style="width: 0%"></div>
+                            <span id="boss-hp-display" class="absolute inset-0 flex items-center justify-center text-[10px] font-display font-bold text-white drop-shadow-md">- / -</span>
+                        </div>
+                        <p id="boss-status-text" class="text-[10px] leading-relaxed" style="color: var(--parchment-dim);"></p>
                     </div>
-                    <div class="text-base font-display font-bold" style="color: var(--ember-bright);" id="enemy-name-display">---</div>
-                    <div class="w-full h-5 overflow-hidden relative gauge-track">
-                        <div id="boss-hp-bar" class="gauge-fill-enemy h-full" style="width: 0%"></div>
-                        <span id="boss-hp-display" class="absolute inset-0 flex items-center justify-center text-xs font-display font-bold text-white drop-shadow-md">- / -</span>
+                    <div class="flex-grow flex flex-col min-h-0">
+                        <p class="text-[10px] font-display font-bold px-3 pt-2 pb-1 border-b" style="color: var(--metal-gold-bright); border-color: var(--stone-light);">戦闘ログ</p>
+                        <div id="announcement-box" class="flex-grow overflow-y-auto custom-scroll p-2 text-[10px] space-y-1" style="background: var(--stone-panel); color: var(--parchment-dim);"></div>
                     </div>
-                    <p id="boss-status-text" class="text-[11px] leading-relaxed mt-1" style="color: var(--parchment-dim);"></p>
                 </div>
 
                 <div id="rest-shop-panel" class="hidden w-full lg:w-56 flex-shrink-0 stone-corners p-4 flex flex-col gap-3 shadow-lg lg:h-full lg:overflow-y-auto custom-scroll border-2" style="border-color: var(--metal-gold); background: var(--stone-panel);">
@@ -461,8 +468,6 @@
         </section>
 
         <div id="shared-main-view" class="hidden flex flex-col gap-6">
-
-            <div id="announcement-box" class="stone-corners p-3 border-2 text-xs space-y-1 max-h-32 overflow-y-auto custom-scroll" style="border-color: var(--metal-gold); background: var(--stone-panel); color: var(--parchment-dim);"></div>
 
             <section id="player-controls-panel" class="hidden">
                 <div id="battle-actions-section" class="stone-corners p-5 border-2" style="border-color: var(--stone-light); background: var(--stone-panel);">
@@ -542,17 +547,29 @@
     </main>
 
     <div id="personal-modal" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="stone-corners w-full max-w-lg border-2 shadow-2xl h-[85vh] flex flex-col overflow-hidden" style="border-color: var(--metal-gold); background: var(--stone-panel);">
+        <div class="stone-corners w-full max-w-5xl border-2 shadow-2xl h-[85vh] flex flex-col overflow-hidden" style="border-color: var(--metal-gold); background: var(--stone-panel);">
             <div class="p-4 border-b-2 flex justify-between items-center" style="background: var(--well); border-color: var(--stone-light);">
                 <h2 class="rune-heading rune-left text-base font-display font-bold">ステータス・装備設定</h2>
                 <button onclick="toggleModal(false)" class="text-xl font-bold px-2" style="color: var(--parchment-dim);">&times;</button>
             </div>
             
-            <div class="p-4 border-b grid grid-cols-4 gap-2 text-center" style="background: var(--stone-panel); border-color: var(--stone-light);">
-                <div class="p-2 border" style="background: var(--well); border-color: var(--stone-light);"><p class="text-[10px]" style="color: var(--parchment-dim);">HP</p><p class="text-sm font-display font-bold" style="color: #c97a63;" id="modal-stat-hp">-/-</p></div>
-                <div class="p-2 border" style="background: var(--well); border-color: var(--stone-light);"><p class="text-[10px]" style="color: var(--parchment-dim);">SP</p><p class="text-sm font-display font-bold" style="color: #7ba0c4;" id="modal-stat-sp">-%</p></div>
-                <div class="p-2 border" style="background: var(--well); border-color: var(--stone-light);"><p class="text-[10px]" style="color: var(--parchment-dim);">攻撃力</p><p class="text-sm font-display font-bold" style="color: var(--ember-bright);" id="modal-stat-atk">-</p></div>
-                <div class="p-2 border" style="background: var(--well); border-color: var(--stone-light);"><p class="text-[10px]" style="color: var(--parchment-dim);">所持金</p><p class="text-sm font-display font-bold" style="color: var(--metal-gold-bright);" id="modal-stat-gold">-G</p></div>
+            <div class="border-b grid grid-cols-1 sm:grid-cols-4 h-auto sm:h-[40vh]" style="background: var(--stone-panel); border-color: var(--stone-light);">
+                <div class="p-4 sm:border-r flex flex-col" style="border-color: var(--stone-light);">
+                    <h4 class="text-xs font-display font-bold mb-2 text-center" style="color: var(--metal-gold-bright);">装備 <span class="block text-[9px] font-normal" style="color: var(--parchment-dim);">(右の予備からドラッグ)</span></h4>
+                    <div id="modal-equip-summary" class="space-y-2 flex-grow flex flex-col justify-center"></div>
+                </div>
+
+                <div class="p-4 sm:col-span-2 flex flex-col items-center justify-center gap-3">
+                    <div id="modal-char-portrait" class="w-48 h-64 border-2 flex items-center justify-center font-display text-6xl" style="background: var(--well); border-color: var(--metal-gold); border-radius: 9999px 9999px 0 0;"></div>
+                    <p id="modal-char-name" class="text-base font-display font-bold" style="color: var(--parchment);"></p>
+                </div>
+
+                <div class="p-4 sm:border-l grid grid-cols-2 gap-3 text-center content-center" style="border-color: var(--stone-light);">
+                    <div class="p-3 border" style="background: var(--well); border-color: var(--stone-light);"><p class="text-xs" style="color: var(--parchment-dim);">HP</p><p class="text-lg font-display font-bold" style="color: #c97a63;" id="modal-stat-hp">-/-</p></div>
+                    <div class="p-3 border" style="background: var(--well); border-color: var(--stone-light);"><p class="text-xs" style="color: var(--parchment-dim);">SP</p><p class="text-lg font-display font-bold" style="color: #7ba0c4;" id="modal-stat-sp">-%</p></div>
+                    <div class="p-3 border" style="background: var(--well); border-color: var(--stone-light);"><p class="text-xs" style="color: var(--parchment-dim);">攻撃力</p><p class="text-lg font-display font-bold" style="color: var(--ember-bright);" id="modal-stat-atk">-</p></div>
+                    <div class="p-3 border" style="background: var(--well); border-color: var(--stone-light);"><p class="text-xs" style="color: var(--parchment-dim);">所持金</p><p class="text-lg font-display font-bold" style="color: var(--metal-gold-bright);" id="modal-stat-gold">-G</p></div>
+                </div>
             </div>
 
             <div class="flex p-3 gap-2" style="background: var(--well);">
@@ -691,6 +708,45 @@
         function buildLootItemName(slot, elementKey) {
             const el = elementData[elementKey];
             return `${el.icon}${el.name}属性${lootItemTemplates[slot].base}`;
+        }
+
+        // 属性相性表：循環(火→闇→風→光→火 が1.5倍、逆方向は0.8倍) ＋ 氷は特殊(他属性へ1.5倍・他属性から0.8倍)
+        const elementCycle = { fire: 'dark', dark: 'wind', wind: 'light', light: 'fire' };
+        const elementCycleReverse = { dark: 'fire', wind: 'dark', light: 'wind', fire: 'light' };
+
+        function getElementMultiplier(attackerElement, defenderElement) {
+            if (!attackerElement || !defenderElement || attackerElement === defenderElement) return 1.0;
+
+            // 氷：他属性へ攻撃する場合は1.5倍
+            if (attackerElement === 'ice') return 1.5;
+            // 氷へ攻撃する場合（氷側が受ける）は通常通り、ただし氷から見ると「他属性から受けるダメージ0.8倍」なので
+            // ここでは「攻撃者→防御者」の倍率を返すため、防御者が氷なら0.8倍
+            if (defenderElement === 'ice') return 0.8;
+
+            // 火→闇、闇→風、風→光、光→火：1.5倍
+            if (elementCycle[attackerElement] === defenderElement) return 1.5;
+            // 闇→火、風→闇、光→風、火→光：0.8倍
+            if (elementCycleReverse[attackerElement] === defenderElement) return 0.8;
+
+            return 1.0;
+        }
+
+        function getEnemyElement() {
+            const stage = localGameState.currentStage;
+            const phase = localGameState.currentPhase;
+            if (!stage || !phase || phase === 'rest' || phase === 'mystery') return null;
+            const data = stageMasterData[stage] && stageMasterData[stage][phase];
+            return data ? data.element : null;
+        }
+
+        function getPlayerElement(role) {
+            const pData = localGameState.players[role];
+            return (pData && pData.element) || charData[role].element;
+        }
+
+        function applyElementMultiplier(baseDamage, attackerElement, defenderElement) {
+            const mult = getElementMultiplier(attackerElement, defenderElement);
+            return { damage: Math.floor(baseDamage * mult), multiplier: mult };
         }
 
         let currentRole = null;
@@ -1032,6 +1088,18 @@
                     document.getElementById("enemy-type-badge").innerText = phase === "boss" ? "👹 エリアボス" : "👾 襲撃モブ";
                     document.getElementById("enemy-name-display").innerText = localGameState.enemyName || "---";
                     document.getElementById("boss-status-text").innerText = `「${localGameState.enemyName}」が立ちはだかっている！`;
+                    const enemyElKey = getEnemyElement();
+                    const enemyElBadge = document.getElementById("enemy-element-badge");
+                    if (enemyElKey) {
+                        const enemyEl = elementData[enemyElKey];
+                        enemyElBadge.innerText = `${enemyEl.icon}${enemyEl.name}`;
+                        enemyElBadge.style.background = "var(--well)";
+                        enemyElBadge.style.color = enemyEl.color;
+                        enemyElBadge.style.borderColor = "var(--stone-light)";
+                        enemyElBadge.classList.remove("hidden");
+                    } else {
+                        enemyElBadge.classList.add("hidden");
+                    }
                     document.getElementById("battle-actions-section").classList.remove("hidden");
                     document.getElementById("ready-action-section").classList.add("hidden");
                     document.getElementById("ready-action-section").classList.remove("flex");
@@ -1124,57 +1192,151 @@
             document.getElementById("modal-stat-atk").innerText = finalAtk;
             document.getElementById("modal-stat-gold").innerText = `${me.gold}G`;
 
+            // 中央：キャラクター名 + 立ち絵プレースホルダー
+            const elKey = me.element || charData[currentRole].element;
+            const el = elementData[elKey];
+            document.getElementById("modal-char-name").innerHTML = `${charData[currentRole].icon} ${charData[currentRole].name.split(' ')[1]} <span class="text-[10px] px-1" style="color: ${el.color};">${el.icon}${el.name}</span>`;
+            document.getElementById("modal-char-portrait").innerHTML = `<span style="color: var(--parchment-dim);">${charData[currentRole].icon}</span>`;
+
+            // 左：装備サマリー（ドロップゾーン）
+            const eqSummary = me.equipment || {};
+            const summaryEl = document.getElementById("modal-equip-summary");
+            summaryEl.innerHTML = Object.entries(equipmentSlots).map(([slotKey, slotInfo]) => {
+                const item = eqSummary[slotKey];
+                if (item) {
+                    const itemEl = elementData[item.element];
+                    return `<div class="loot-drop-zone text-[11px] px-2 py-1.5 border flex items-center gap-1.5" data-slot="${slotKey}" style="background: var(--well); border-color: var(--metal-gold);">
+                        <span>${slotInfo.icon}</span>
+                        <span class="loot-drag-item truncate" draggable="true" data-item-id="${item.id}" data-source="equipped" data-slot="${slotKey}" style="color: ${itemEl.color}; cursor: grab;" title="${item.name}">${itemEl.icon}${item.name} ⠿</span>
+                    </div>`;
+                }
+                return `<div class="loot-drop-zone text-[11px] px-2 py-1.5 border flex items-center gap-1.5 opacity-50" data-slot="${slotKey}" style="background: var(--well); border-color: var(--stone-light); color: var(--parchment-dim);">
+                    <span>${slotInfo.icon}</span><span>${slotInfo.name}：未装備</span>
+                </div>`;
+            }).join('');
+
             const content = document.getElementById("modal-content");
             content.innerHTML = "";
 
             if (currentModalTab === 'equip') {
-                const eq = me.equipment || {};
-                let equipmentHtml = `<h3 class="rune-heading rune-left text-xs font-display font-bold mb-3 border-b pb-1" style="border-color: var(--stone-light);">⚔ 部位別装備(戦利品)</h3>`;
-                equipmentHtml += `<div class="grid grid-cols-1 gap-2 mb-4">`;
-                Object.entries(equipmentSlots).forEach(([slotKey, slotInfo]) => {
-                    const item = eq[slotKey];
-                    if (item) {
-                        const el = elementData[item.element];
-                        equipmentHtml += `<div class="p-2 border flex justify-between items-center text-xs" style="background: var(--well); border-color: var(--metal-gold);">
-                            <span>${slotInfo.icon} ${slotInfo.name}</span>
-                            <span style="color: ${el.color};">${el.icon}${item.name} (ATK+${item.atkBonus})</span>
-                        </div>`;
-                    } else {
-                        equipmentHtml += `<div class="p-2 border flex justify-between items-center text-xs opacity-50" style="background: var(--well); border-color: var(--stone-light);">
-                            <span>${slotInfo.icon} ${slotInfo.name}</span>
-                            <span style="color: var(--parchment-dim);">未装備</span>
-                        </div>`;
-                    }
-                });
-                equipmentHtml += `</div>`;
+                const reserve = me.inventoryItems || [];
 
-                content.innerHTML = equipmentHtml + `
-                    <h3 class="rune-heading rune-left text-xs font-display font-bold mb-3 border-b pb-1" style="border-color: var(--stone-light);">🎒 所持品 ＆ 装備</h3>
+                // 予備の戦利品(inventoryItems)
+                let equipmentHtml = `<h3 class="rune-heading rune-left text-xs font-display font-bold mb-3 border-b pb-1" style="border-color: var(--stone-light);">🎁 予備の戦利品</h3>`;
+                equipmentHtml += `<p class="text-[10px] mb-2" style="color: var(--parchment-dim);">アイテムをドラッグして、上部の「装備」欄にドロップすると装備が交換されます。</p>`;
+                if (reserve.length > 0) {
+                    equipmentHtml += `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4" id="loot-reserve-list">`;
+                    reserve.forEach(item => {
+                        const el = elementData[item.element];
+                        const slotInfo = equipmentSlots[item.slot];
+                        equipmentHtml += `<div class="loot-drag-item p-2 border flex justify-between items-center text-xs" draggable="true" data-item-id="${item.id}" data-source="reserve" data-slot="${item.slot}" style="background: var(--well); border-color: var(--stone-light); color: ${el.color}; cursor: grab;">
+                            <span>${slotInfo.icon} ${slotInfo.name}</span>
+                            <span>${el.icon}${item.name} (ATK+${item.atkBonus}) ⠿</span>
+                        </div>`;
+                    });
+                    equipmentHtml += `</div>`;
+                } else {
+                    equipmentHtml += `<p class="text-xs mb-4" style="color: var(--parchment-dim);">予備の戦利品はありません。</p>`;
+                }
+
+                const inventoryHtml = `
+                    <h3 class="rune-heading rune-left text-xs font-display font-bold mb-3 border-b pb-1" style="border-color: var(--stone-light);">🎒 所持品</h3>
                     <div class="grid grid-cols-1 gap-2">
                         ${me.inventory ? me.inventory.map(item => {
                             const isEq = me.equipped === item;
                             const isConsumable = commonShopItems.some(ci => ci.name === item);
                             return `
-                            <div class="p-3 border flex justify-between items-center" style="background: var(--well); border-color: ${isEq ? 'var(--metal-gold)' : 'var(--stone-light)'};">
-                                <div>
-                                    <p class="text-sm font-display font-bold" style="color: ${isEq ? 'var(--metal-gold-bright)' : 'var(--parchment)'};">${item} ${isEq ? `<span class="text-[10px] px-1 ml-1" style="background: var(--metal-gold); color: var(--stone-dark);">装備中</span>` : ''}</p>
-                                </div>
-                                ${!isEq && !isConsumable ? `<button onclick="equipItem('${item}')" class="iron-btn text-xs px-3 py-1.5">装備する</button>` : ''}
+                            <div class="p-2 border" style="background: var(--well); border-color: ${isEq ? 'var(--metal-gold)' : 'var(--stone-light)'};">
+                                <p class="text-xs font-display font-bold" style="color: ${isEq ? 'var(--metal-gold-bright)' : 'var(--parchment)'};">${item}</p>
+                                ${isEq ? `<span class="text-[9px] px-1" style="background: var(--metal-gold); color: var(--stone-dark);">装備中</span>` : ''}
+                                ${!isEq && !isConsumable ? `<button onclick="equipItem('${item}')" class="iron-btn text-[10px] px-2 py-1 mt-1 w-full">装備する</button>` : ''}
                             </div>
                             `;
                         }).join('') : `<p class="text-xs" style="color: var(--parchment-dim);">アイテムを持っていません。</p>`}
                     </div>
                 `;
+
+                content.innerHTML = `
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="w-full md:w-3/4">${equipmentHtml}</div>
+                        <div class="w-full md:w-1/4 md:border-l md:pl-4" style="border-color: var(--stone-light);">${inventoryHtml}</div>
+                    </div>
+                `;
             } else if (currentModalTab === 'secret') {
                 content.innerHTML = `
-                    <h3 class="rune-heading rune-left text-xs font-display font-bold mb-3 border-b pb-1" style="border-color: var(--stone-light);">📜 あなたが知る極秘情報</h3>
-                    <div class="p-4 border text-xs leading-relaxed" style="background: rgba(194,65,12,0.1); border-color: var(--ember); color: #e0b8a8;">
-                        ${charData[currentRole].secret}
+                    <div class="max-w-xl mx-auto">
+                        <h3 class="rune-heading rune-left text-xs font-display font-bold mb-3 border-b pb-1" style="border-color: var(--stone-light);">📜 あなたが知る極秘情報</h3>
+                        <div class="p-4 border text-xs leading-relaxed" style="background: rgba(194,65,12,0.1); border-color: var(--ember); color: #e0b8a8;">
+                            ${charData[currentRole].secret}
+                        </div>
+                        <p class="text-[10px] mt-2 text-center" style="color: var(--parchment-dim);">※情報屋から買った情報もここに表示されます（現状は初期秘密のみ）</p>
                     </div>
-                    <p class="text-[10px] mt-2 text-center" style="color: var(--parchment-dim);">※情報屋から買った情報もここに表示されます（現状は初期秘密のみ）</p>
                 `;
             }
+            setupLootDragAndDrop();
         }
+
+        // ==========================================
+        // 戦利品装備のドラッグ＆ドロップ
+        // ==========================================
+        function setupLootDragAndDrop() {
+            const items = document.querySelectorAll(".loot-drag-item");
+            const zones = document.querySelectorAll(".loot-drop-zone");
+
+            items.forEach(el => {
+                el.addEventListener("dragstart", (e) => {
+                    e.dataTransfer.setData("text/plain", JSON.stringify({
+                        itemId: el.dataset.itemId,
+                        source: el.dataset.source,
+                        slot: el.dataset.slot
+                    }));
+                    el.style.opacity = "0.5";
+                });
+                el.addEventListener("dragend", () => { el.style.opacity = "1"; });
+            });
+
+            zones.forEach(zone => {
+                zone.addEventListener("dragover", (e) => { e.preventDefault(); zone.style.outline = "2px solid var(--metal-gold-bright)"; });
+                zone.addEventListener("dragleave", () => { zone.style.outline = "none"; });
+                zone.addEventListener("drop", (e) => {
+                    e.preventDefault();
+                    zone.style.outline = "none";
+                    const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+                    const targetSlot = zone.dataset.slot;
+                    if (data.slot !== targetSlot) {
+                        alert(`「${equipmentSlots[data.slot].name}」のアイテムは「${equipmentSlots[targetSlot].name}」の枠には装備できません。`);
+                        return;
+                    }
+                    if (data.source === 'equipped') return; // すでに装備中のものを同じ枠に戻しても何もしない
+                    swapEquipmentItem(data.itemId, targetSlot);
+                });
+            });
+        }
+
+        window.swapEquipmentItem = function(reserveItemId, slot) {
+            const pData = localGameState.players[currentRole];
+            const reserve = pData.inventoryItems || [];
+            const newItemIndex = reserve.findIndex(i => i.id === reserveItemId);
+            if (newItemIndex === -1) return;
+            const newItem = reserve[newItemIndex];
+
+            const oldEquippedItem = (pData.equipment && pData.equipment[slot]) || null;
+
+            // equipment更新
+            const newEquipment = { ...(pData.equipment || {}), [slot]: newItem };
+
+            // inventoryItems更新: 新アイテムを除き、旧装備を追加
+            const newInventoryItems = reserve.filter((_, i) => i !== newItemIndex);
+            if (oldEquippedItem) newInventoryItems.push(oldEquippedItem);
+
+            // atk再計算
+            const oldBonus = (oldEquippedItem && oldEquippedItem.atkBonus) || 0;
+            const newBonus = newItem.atkBonus || 0;
+            const newAtk = (pData.atk || pData.baseAtk) - oldBonus + newBonus;
+
+            update(ref(db, `gameState/players/${currentRole}`), { equipment: newEquipment, inventoryItems: newInventoryItems, atk: newAtk });
+            pushActionLog(charData[currentRole].name, `装備を「${newItem.name}」(${equipmentSlots[slot].name})に交換した。`);
+        };
 
         window.equipItem = function(itemName) {
             const me = localGameState.players[currentRole];
@@ -1365,10 +1527,17 @@
             if (actionType === 'attack') {
                 const isCrit = Math.random() < 0.20; 
                 if (isCrit) damage *= 2;
+
+                const enemyEl = getEnemyElement();
+                const myEl = getPlayerElement(currentRole);
+                const { damage: finalDamage, multiplier } = applyElementMultiplier(damage, myEl, enemyEl);
+                damage = finalDamage;
+                const elTagPlain = multiplier > 1 ? ` (効果は抜群だ！×${multiplier})` : (multiplier < 1 ? ` (効果はいまひとつ…×${multiplier})` : '');
+
                 update(ref(db, `gameState/players/${currentRole}`), { sp: Math.min((pData.sp || 0) + 20, 100) });
                 triggerActionEffect(isCrit ? 'slash-big' : 'slash');
-                pushActionLog(charData[currentRole].name, isCrit ? `💥会心！【${damage}】ダメージ！` : `攻撃し【${damage}】ダメージ！`);
-                sendAnnouncement(isCrit ? `💥 ⚡CRITICAL⚡ ${charData[currentRole].name} の攻撃！ 【${damage}】ダメージ！` : `⚔️ ${charData[currentRole].name} の攻撃、${damage} ダメージ。`);
+                pushActionLog(charData[currentRole].name, (isCrit ? `💥会心！【${damage}】ダメージ！` : `攻撃し【${damage}】ダメージ！`) + elTagPlain);
+                sendAnnouncement((isCrit ? `💥 ⚡CRITICAL⚡ ${charData[currentRole].name} の攻撃！ 【${damage}】ダメージ！` : `⚔️ ${charData[currentRole].name} の攻撃、${damage} ダメージ。`) + elTagPlain);
                 
                 const nextHp = Math.max(localGameState.enemyHp - damage, 0);
                 nextHp <= 0 ? handleEnemyDefeat() : update(ref(db, 'gameState'), { enemyHp: nextHp });
@@ -1376,10 +1545,17 @@
             } else if (actionType === 'skill') {
                 if ((pData.sp || 0) < 50) return alert("SPが50%未満です！");
                 damage = Math.floor(damage * 2.5);
+
+                const enemyEl = getEnemyElement();
+                const myEl = getPlayerElement(currentRole);
+                const { damage: finalDamage, multiplier } = applyElementMultiplier(damage, myEl, enemyEl);
+                damage = finalDamage;
+                const elTagPlain = multiplier > 1 ? ` (効果は抜群だ！×${multiplier})` : (multiplier < 1 ? ` (効果はいまひとつ…×${multiplier})` : '');
+
                 update(ref(db, `gameState/players/${currentRole}`), { sp: (pData.sp || 0) - 50 });
                 triggerActionEffect('magic');
-                pushActionLog(charData[currentRole].name, `🔥 固有スキル！【${damage}】ダメージ！`);
-                sendAnnouncement(`🔥 ${charData[currentRole].name} の必殺スキル！ 【${damage}】 ダメージ！`);
+                pushActionLog(charData[currentRole].name, `🔥 固有スキル！【${damage}】ダメージ！` + elTagPlain);
+                sendAnnouncement(`🔥 ${charData[currentRole].name} の必殺スキル！ 【${damage}】 ダメージ！` + elTagPlain);
                 
                 const nextHp = Math.max(localGameState.enemyHp - damage, 0);
                 nextHp <= 0 ? handleEnemyDefeat() : update(ref(db, 'gameState'), { enemyHp: nextHp });
@@ -1396,11 +1572,17 @@
                 }
 
                 if (ult.type === 'attack') {
-                    const ultDamage = Math.floor(pData.atk * ult.multiplier);
+                    let ultDamage = Math.floor(pData.atk * ult.multiplier);
+                    const enemyEl = getEnemyElement();
+                    const myEl = getPlayerElement(currentRole);
+                    const { damage: finalUltDamage, multiplier: ultMult } = applyElementMultiplier(ultDamage, myEl, enemyEl);
+                    ultDamage = finalUltDamage;
+                    const elTagPlain = ultMult > 1 ? ` (効果は抜群だ！×${ultMult})` : (ultMult < 1 ? ` (効果はいまひとつ…×${ultMult})` : '');
+
                     update(ref(db, `gameState/players/${currentRole}`), { ultimateUsedStage: localGameState.currentStage });
                     triggerActionEffect('slash-big');
-                    pushActionLog(charData[currentRole].name, `💎 必殺技『${ult.name}』！【${ultDamage}】ダメージ！`);
-                    sendAnnouncement(`💎 ${charData[currentRole].name} の必殺技『${ult.name}』！ 【${ultDamage}】 大ダメージ！`);
+                    pushActionLog(charData[currentRole].name, `💎 必殺技『${ult.name}』！【${ultDamage}】ダメージ！` + elTagPlain);
+                    sendAnnouncement(`💎 ${charData[currentRole].name} の必殺技『${ult.name}』！ 【${ultDamage}】 大ダメージ！` + elTagPlain);
 
                     const nextHp = Math.max(localGameState.enemyHp - ultDamage, 0);
                     nextHp <= 0 ? handleEnemyDefeat() : update(ref(db, 'gameState'), { enemyHp: nextHp });
@@ -1562,14 +1744,20 @@
 
             // 装備とインベントリに反映
             const pData = localGameState.players[currentRole];
-            const newEquipment = { ...(pData.equipment || {}), [slot]: { name: itemName, element: elementKey, atkBonus: atkBonus, tier: tier } };
+            const newItem = { id: `loot_${Date.now()}_${currentRole}`, name: itemName, slot: slot, element: elementKey, atkBonus: atkBonus, tier: tier };
+            const oldEquippedItem = (pData.equipment && pData.equipment[slot]) || null;
+            const newEquipment = { ...(pData.equipment || {}), [slot]: newItem };
             const newInventory = [...(pData.inventory || []), itemName];
 
+            // 既存の装備があれば、それを予備在庫(inventoryItems)に戻す
+            const newInventoryItems = [...(pData.inventoryItems || [])];
+            if (oldEquippedItem) newInventoryItems.push(oldEquippedItem);
+
             // 攻撃力に反映 (旧装備のボーナスを引いて新しいものを足す)
-            const oldBonus = (pData.equipment && pData.equipment[slot] && pData.equipment[slot].atkBonus) || 0;
+            const oldBonus = (oldEquippedItem && oldEquippedItem.atkBonus) || 0;
             const newAtk = (pData.atk || pData.baseAtk) - oldBonus + atkBonus;
 
-            update(ref(db, `gameState/players/${currentRole}`), { equipment: newEquipment, inventory: newInventory, atk: newAtk });
+            update(ref(db, `gameState/players/${currentRole}`), { equipment: newEquipment, inventory: newInventory, inventoryItems: newInventoryItems, atk: newAtk });
 
             const picks = { ...(lp.picks || {}) };
             picks[currentRole] = { slot: slot, element: elementKey };
